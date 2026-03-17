@@ -1,0 +1,52 @@
+### ==============================
+### REGISTER USER
+### ==============================
+
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test2@test.com",
+  "password": "123456"
+}
+
+
+### ==============================
+### LOGIN USER
+### ==============================
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "123456"
+}
+
+### ==============================
+### PROTECTED ROUTE TEST
+### ==============================
+
+GET http://localhost:5000/api/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGVlOWNjNzVmY2E3ZWM3YmY0ZTllZCIsImlhdCI6MTc3MTU3NjQxMywiZXhwIjoxNzcxNjYyODEzfQ.AGZkdfJwk1yDLC9MQ1iRqSEYdw0C9_sYuM3u6gypFVU
+
+### CREATE PROFILE
+
+POST http://localhost:5000/api/profile/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGVlOWNjNzVmY2E3ZWM3YmY0ZTllZCIsImlhdCI6MTc3MTU3NjQxMywiZXhwIjoxNzcxNjYyODEzfQ.AGZkdfJwk1yDLC9MQ1iRqSEYdw0C9_sYuM3u6gypFVU
+
+{
+  "cgpa": 8.5,
+  "skills": ["JavaScript","React","Node"],
+  "interests": ["AI","Web Development"],
+  "internships": ["Frontend Intern"],
+  "certifications": ["AWS Basics"],
+  "bio": "Passionate developer"
+}
+
+
+PUT http://localhost:5000/api/profile/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
