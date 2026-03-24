@@ -1,0 +1,24 @@
+import pdfplumber
+import json
+
+# Load skills
+with open("skills.json") as f:
+    SKILLS_DB = json.load(f)
+
+
+def extract_text(file_path):
+    text = ""
+    with pdfplumber.open(file_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() or ""
+    return text.lower()
+
+
+def extract_skills(text):
+    found_skills = []
+
+    for skill in SKILLS_DB:
+        if skill in text:
+            found_skills.append(skill)
+
+    return list(set(found_skills))
