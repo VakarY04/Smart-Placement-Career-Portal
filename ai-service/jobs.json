@@ -1,0 +1,62 @@
+[
+  {
+    "id": "job_001",
+    "title": "Frontend Developer",
+    "company": "Google",
+    "description": "Build next-generation web applications. Focus on performance and user experience.",
+    "required_skills": ["JavaScript", "React", "HTML", "CSS", "TypeScript"],
+    "min_cgpa": 7.5,
+    "location": "Bangalore, India",
+    "salary_range": "20-30 LPA"
+  },
+  {
+    "id": "job_002",
+    "title": "Backend Engineer",
+    "company": "Amazon",
+    "description": "Design and build highly scalable backend services in Node.js and AWS.",
+    "required_skills": ["Node.js", "Express", "MongoDB", "AWS", "System Design"],
+    "min_cgpa": 8.0,
+    "location": "Hyderabad, India",
+    "salary_range": "18-28 LPA"
+  },
+  {
+    "id": "job_003",
+    "title": "Data Scientist",
+    "company": "Microsoft",
+    "description": "Analyze large datasets and build machine learning models for enterprise solutions.",
+    "required_skills": ["Python", "Machine Learning", "SQL", "Data Analysis", "Pandas"],
+    "min_cgpa": 8.5,
+    "location": "Remote",
+    "salary_range": "25-35 LPA"
+  },
+  {
+    "id": "job_004",
+    "title": "Full Stack Developer",
+    "company": "Startup Inc.",
+    "description": "Looking for a versatile developer who can handle both React frontend and Node.js backend.",
+    "required_skills": ["JavaScript", "React", "Node", "MongoDB", "Tailwind CSS"],
+    "min_cgpa": 7.0,
+    "location": "Mumbai, India",
+    "salary_range": "10-15 LPA"
+  },
+  {
+    "id": "job_005",
+    "title": "DevOps Engineer",
+    "company": "Netflix",
+    "description": "Manage infrastructure, CI/CD pipelines, and cloud deployments.",
+    "required_skills": ["AWS", "Docker", "Kubernetes", "Linux", "CI/CD"],
+    "min_cgpa": 7.5,
+    "location": "Bangalore, India",
+    "salary_range": "22-32 LPA"
+  },
+  {
+    "id": "job_006",
+    "title": "UI/UX Designer",
+    "company": "Adobe",
+    "description": "Create intuitive and appealing user interfaces for creative professionals.",
+    "required_skills": ["Figma", "UI Design", "Prototyping", "Wireframing"],
+    "min_cgpa": 6.5,
+    "location": "Noida, India",
+    "salary_range": "12-20 LPA"
+  }
+]

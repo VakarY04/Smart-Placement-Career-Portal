@@ -1,0 +1,3 @@
+PORT=5000
+MONGO_URI=mongodb+srv://Vakar:admin@cluster0.rtfurxp.mongodb.net/?appName=Cluster0
+JWT_SECRET=mysecretkey123
