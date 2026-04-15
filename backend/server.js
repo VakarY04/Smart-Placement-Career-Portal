@@ -59,28 +59,57 @@ app.post("/api/upload-resume", upload.single("resume"), async (req, res) => {
 });
 
 const Profile = require("./models/StudentProfile");
+const JobListing = require("./models/JobListing");
 const { protect } = require("./middleware/authMiddleware");
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
 
-app.get("/api/recommend", protect, async (req, res) => {
+const buildStudentPayload = (profile) => ({
+  cgpa: Number(profile.cgpa) || 0,
+  skills: Array.isArray(profile.skills) ? profile.skills : [],
+  interests: Array.isArray(profile.interests) ? profile.interests : [],
+  internships: Array.isArray(profile.internships) ? profile.internships : [],
+  certifications: Array.isArray(profile.certifications) ? profile.certifications : [],
+  bio: Array.isArray(profile.bio) ? profile.bio.join("\n") : (profile.bio || "")
+});
+
+const buildJobPayload = (listing) => ({
+  id: listing._id.toString(),
+  _id: listing._id.toString(),
+  title: listing.title,
+  company: listing.company,
+  description: listing.description,
+  required_skills: Array.isArray(listing.requiredSkills) ? listing.requiredSkills : [],
+  min_cgpa: Number(listing.cgpaThreshold) || 0,
+});
+
+app.get("/api/recommendations", protect, async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user.id });
     if (!profile) {
       return res.status(404).json({ message: "Profile not complete yet" });
     }
 
-    const payload = {
-      cgpa: Number(profile.cgpa) || 0,
-      skills: Array.isArray(profile.skills) ? profile.skills : [],
-      interests: Array.isArray(profile.interests) ? profile.interests : [],
-      internships: Array.isArray(profile.internships) ? profile.internships : [],
-      certifications: Array.isArray(profile.certifications) ? profile.certifications : [],
-      bio: Array.isArray(profile.bio) ? profile.bio.join("\n") : (profile.bio || "")
+    const jobListings = await JobListing.find({ isActive: true }).sort({ createdAt: -1 });
+    if (!jobListings.length) {
+      return res.json({ recommendations: [] });
+    }
+
+    const aiPayload = {
+      student: buildStudentPayload(profile),
+      jobs: jobListings.map(buildJobPayload),
     };
 
-    const aiResponse = await axios.post("http://127.0.0.1:8000/recommend", payload);
+    const aiResponse = await axios.post(`${AI_SERVICE_URL}/analyze-matches`, aiPayload, {
+      timeout: 20000,
+    });
     res.json(aiResponse.data);
 
   } catch (error) {
+    if (error.code === "ECONNABORTED") {
+      return res.status(504).json({
+        message: "AI matching timed out. Please try again in a few seconds.",
+      });
+    }
     if (error.response) {
       console.error("AI Recommendation Error Payload:", error.response.data);
     }
@@ -89,24 +118,23 @@ app.get("/api/recommend", protect, async (req, res) => {
   }
 });
 
+app.get("/api/recommend", protect, async (req, res) => {
+  return res.redirect(307, "/api/recommendations");
+});
+
 app.get("/api/roadmap/:jobId", protect, async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user.id });
     if (!profile) return res.status(404).json({ message: "Profile not found" });
+    const jobListing = await JobListing.findOne({ _id: req.params.jobId, isActive: true });
+    if (!jobListing) return res.status(404).json({ message: "Job not found" });
 
     const payload = {
-      target_job: req.params.jobId,
-      profile: {
-        cgpa: Number(profile.cgpa) || 0,
-        skills: Array.isArray(profile.skills) ? profile.skills : [],
-        interests: Array.isArray(profile.interests) ? profile.interests : [],
-        internships: Array.isArray(profile.internships) ? profile.internships : [],
-        certifications: Array.isArray(profile.certifications) ? profile.certifications : [],
-        bio: Array.isArray(profile.bio) ? profile.bio.join("\n") : (profile.bio || "")
-      }
+      job: buildJobPayload(jobListing),
+      profile: buildStudentPayload(profile)
     };
 
-    const aiResponse = await axios.post("http://127.0.0.1:8000/roadmap", payload);
+    const aiResponse = await axios.post(`${AI_SERVICE_URL}/roadmap`, payload);
     
     if (aiResponse.data.error) {
       return res.status(400).json({ message: aiResponse.data.error });
@@ -181,8 +209,10 @@ app.delete("/api/applications/:id", protect, async (req, res) => {
 });
 
 const authRoutes = require("./routes/authRoutes");
+const jobListingRoutes = require("./routes/jobListingRoutes");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin/jobs", jobListingRoutes);
 
 const profileRoutes = require("./routes/profileRoutes");
 

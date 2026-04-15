@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Loader2, ArrowLeft, Briefcase, GraduationCap, CheckCircle2, Bookmark, ExternalLink, Flame } from 'lucide-react';
 
 export default function Roadmap() {
   const { jobId } = useParams();
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +43,8 @@ export default function Roadmap() {
     );
   }
 
-  const { job, is_ready, missing_skills, roadmap } = data;
+  const { job, is_ready, roadmap } = data;
+  const missingSkills = data.missingSkills || data.missing_skills || location.state?.missingSkills || [];
 
   return (
     <div className="animate-fade-in-up space-y-8 pb-10">
@@ -71,7 +73,7 @@ export default function Roadmap() {
               </span>
             ) : (
               <span className="text-amber-500 font-bold flex items-center gap-2">
-                <Flame className="w-5 h-5" /> {missing_skills.length} Skills to Master
+                <Flame className="w-5 h-5" /> {missingSkills.length} Skills to Master
               </span>
             )}
           </div>
@@ -131,13 +133,13 @@ export default function Roadmap() {
           <div className="glass-panel p-6 sticky top-8">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-3">Skill Gap Analysis</h3>
             
-            {missing_skills.length > 0 ? (
+            {missingSkills.length > 0 ? (
               <div className="space-y-4">
                 <p className="text-sm text-slate-500 leading-relaxed mb-4">
                   The AI detected these core competencies missing from your current profile compared to {job.company}'s requirements.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {missing_skills.map(skill => (
+                  {missingSkills.map(skill => (
                     <span key={skill} className="bg-red-50 text-red-600 font-semibold px-3 py-1.5 rounded-lg text-sm border border-red-100">
                       {skill}
                     </span>

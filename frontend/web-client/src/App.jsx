@@ -2,25 +2,50 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
-// A simple protected route wrapper
-function ProtectedRoute({ children }) {
+const getStoredUser = () => {
+  try {
+    const parsedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    return {
+      ...parsedUser,
+      role: typeof parsedUser.role === 'string' ? parsedUser.role.toUpperCase() : parsedUser.role,
+    };
+  } catch {
+    return {};
+  }
+};
+
+function ProtectedRoute({ children, requiredRole }) {
   const token = localStorage.getItem('token');
+  const user = getStoredUser();
   const location = useLocation();
 
   if (!token) {
-    // Redirect them to the /login page, but save the current location they were trying to go to
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (!user.role) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && user.role !== requiredRole) {
+    return <Navigate to={user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard/resume-upload'} replace />;
   }
 
   return children;
 }
 
-// Redirect authenticated users away from auth pages
 function PublicOnlyRoute({ children }) {
   const token = localStorage.getItem('token');
+  const user = getStoredUser();
   
   if (token) {
+    if (user.role === 'ADMIN') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
     return <Navigate to="/dashboard/resume-upload" replace />;
   }
 
@@ -33,23 +58,25 @@ function App() {
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard/resume-upload" replace />} />
-          
-          {/* Public Auth Routes */}
           <Route path="/login" element={
             <PublicOnlyRoute>
               <Login />
             </PublicOnlyRoute>
           } />
+          <Route path="/admin/login" element={<Navigate to="/login?role=admin" replace />} />
           <Route path="/signup" element={
             <PublicOnlyRoute>
               <Signup />
             </PublicOnlyRoute>
           } />
-          
-          {/* Protected Dashboard Routes */}
           <Route path="/dashboard/*" element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="STUDENT">
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/dashboard/*" element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminDashboard />
             </ProtectedRoute>
           } />
         </Routes>

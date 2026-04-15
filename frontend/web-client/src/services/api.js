@@ -28,9 +28,9 @@ export const apiService = {
     }
   },
 
-  register: async (name, email, password) => {
+  register: async (name, email, password, role = 'STUDENT') => {
     try {
-      const response = await apiClient.post('/auth/register', { name, email, password });
+      const response = await apiClient.post('/auth/register', { name, email, password, role });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -86,7 +86,7 @@ export const apiService = {
   // --- Recommendations endpoint ---
   getRecommendations: async () => {
     try {
-      const response = await apiClient.get('/recommend');
+      const response = await apiClient.get('/recommendations');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -119,6 +119,33 @@ export const apiService = {
 
   deleteApplication: async (id) => {
     const res = await apiClient.delete(`/applications/${id}`);
+    return res.data;
+  },
+
+  getAdminJobs: async (search = '') => {
+    const res = await apiClient.get('/admin/jobs', {
+      params: search ? { search } : {},
+    });
+    return res.data;
+  },
+
+  createAdminJob: async (payload) => {
+    const res = await apiClient.post('/admin/jobs', payload);
+    return res.data;
+  },
+
+  updateAdminJob: async (id, payload) => {
+    const res = await apiClient.put(`/admin/jobs/${id}`, payload);
+    return res.data;
+  },
+
+  deleteAdminJob: async (id) => {
+    const res = await apiClient.delete(`/admin/jobs/${id}`);
+    return res.data;
+  },
+
+  getAdminAnalytics: async () => {
+    const res = await apiClient.get('/admin/jobs/analytics');
     return res.data;
   },
 

@@ -1,5 +1,3 @@
-import json
-
 RESOURCE_DB = {
     "javascript": {"title": "JavaScript Comprehensive Guide", "type": "Documentation", "link": "https://developer.mozilla.org/en-US/docs/Web/JavaScript"},
     "react": {"title": "React.js Official Tutorial", "type": "Course", "link": "https://react.dev/learn"},
@@ -13,19 +11,14 @@ RESOURCE_DB = {
     "typescript": {"title": "TypeScript Handbook", "type": "Documentation", "link": "https://www.typescriptlang.org/docs/"}
 }
 
-def load_jobs():
-    with open("jobs.json", "r") as f:
-        return json.load(f)
 
-def generate_roadmap(profile, target_job_id):
-    jobs = load_jobs()
-    job = next((j for j in jobs if j.get("id") == target_job_id), None)
-    
+def generate_roadmap(profile, job):
     if not job:
         return {"error": "Job not found"}
-        
+
     student_skills = [s.strip().lower() for s in profile.get("skills", [])]
-    job_skills = [s.strip().lower() for s in job.get("required_skills", [])]
+    raw_job_skills = job.get("required_skills", job.get("requiredSkills", []))
+    job_skills = [s.strip().lower() for s in raw_job_skills]
     
     missing_skills = [s for s in job_skills if s not in student_skills]
     
@@ -75,5 +68,6 @@ def generate_roadmap(profile, target_job_id):
         "job": job,
         "is_ready": len(missing_skills) == 0,
         "missing_skills": [s.title() for s in missing_skills],
+        "missingSkills": [s.title() for s in missing_skills],
         "roadmap": roadmap_steps
     }

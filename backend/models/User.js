@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ["STUDENT", "ADMIN"],
+    default: "STUDENT",
+    set: (value) => (typeof value === "string" ? value.toUpperCase() : value),
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

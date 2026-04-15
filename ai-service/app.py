@@ -4,10 +4,16 @@ from resume_parser import extract_text, extract_skills
 from recommendation_engine import get_recommendations
 from roadmap_engine import generate_roadmap
 from ats_engine import analyze_ats
+from match_engine import analyze_match, analyze_matches, get_embedding_model
 from pydantic import BaseModel
 from typing import List, Optional
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def warm_embedding_model():
+    get_embedding_model()
 
 class StudentProfileRequest(BaseModel):
     cgpa: float
@@ -17,9 +23,30 @@ class StudentProfileRequest(BaseModel):
     certifications: List[str]
     bio: str
 
-class RoadmapRequest(BaseModel):
-    job: dict
-    profile: StudentProfileRequest
+class StudentMatchRequest(BaseModel):
+    skills: List[str]
+    bio: str
+    cgpa: float
+
+
+class JobMatchRequest(BaseModel):
+    required_skills: List[str]
+    description: str
+    min_cgpa: float
+    id: Optional[str] = None
+    _id: Optional[str] = None
+    title: Optional[str] = None
+    company: Optional[str] = None
+
+
+class AnalyzeMatchRequest(BaseModel):
+    student: StudentMatchRequest
+    job: JobMatchRequest
+
+
+class AnalyzeMatchesRequest(BaseModel):
+    student: StudentMatchRequest
+    jobs: List[JobMatchRequest]
 
 @app.post("/parse-resume")
 async def parse_resume(file: UploadFile = File(...)):
@@ -46,9 +73,24 @@ async def recommend_jobs(profile: StudentProfileRequest):
     }
 
 class RoadmapRequest(BaseModel):
-    target_job: str
+    job: dict
     profile: StudentProfileRequest
 
 @app.post("/roadmap")
 async def get_roadmap(request: RoadmapRequest):
-    return generate_roadmap(request.profile.dict(), request.target_job)
+    return generate_roadmap(request.profile.dict(), request.job)
+
+
+@app.post("/analyze-match")
+async def analyze_student_job_match(request: AnalyzeMatchRequest):
+    return analyze_match(request.student.dict(), request.job.dict())
+
+
+@app.post("/analyze-matches")
+async def analyze_student_job_matches(request: AnalyzeMatchesRequest):
+    return {
+        "recommendations": analyze_matches(
+            request.student.dict(),
+            [job.dict() for job in request.jobs],
+        )
+    }

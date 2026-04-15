@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { Briefcase, Building2, MapPin, DollarSign, CheckCircle2, ChevronRight, Loader2, Sparkles, AlertCircle, BookmarkPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Briefcase, Building2, CheckCircle2, ChevronRight, Loader2, Sparkles, AlertCircle, BookmarkPlus } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Recommendations() {
+  const location = useLocation();
   const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,6 +14,7 @@ export default function Recommendations() {
     const fetchRecommendations = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const data = await apiService.getRecommendations();
         setRecommendations(data.recommendations || []);
         
@@ -20,7 +22,7 @@ export default function Recommendations() {
           const appsData = await apiService.getApplications();
           const trackedIds = appsData.map(app => app.jobId);
           setTrackedJobs(new Set(trackedIds));
-        } catch(e) {}
+        } catch {}
 
       } catch (err) {
         setError(err.message || 'Failed to load recommendations');
@@ -30,19 +32,20 @@ export default function Recommendations() {
     };
     
     fetchRecommendations();
-  }, []);
+  }, [location.key]);
 
-  const handleTrackJob = async (job) => {
+  const handleTrackJob = async (jobRecord) => {
     try {
+      const jobId = jobRecord.id || jobRecord._id;
       await apiService.createApplication({
-        jobId: job.id,
-        jobTitle: job.title,
-        company: job.company,
+        jobId,
+        jobTitle: jobRecord.title,
+        company: jobRecord.company,
         status: "Applied"
       });
       setTrackedJobs(prev => {
         const next = new Set(prev);
-        next.add(job.id);
+        next.add(jobId);
         return next;
       });
     } catch (err) {
@@ -106,20 +109,21 @@ export default function Recommendations() {
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {recommendations.map((item, index) => {
-            const { job, match_percentage, match_details } = item;
+          {recommendations.map((item) => {
+            const { job, matchPercentage, breakdown, missingSkills = [] } = item;
+            const jobId = job.id || job._id;
             
             // Determine ring color based on match
-            const ringColor = match_percentage >= 80 
+            const ringColor = matchPercentage >= 80 
               ? 'text-emerald-500 border-emerald-500' 
-              : match_percentage >= 60 
+              : matchPercentage >= 60 
               ? 'text-amber-500 border-amber-500' 
               : 'text-slate-500 border-slate-300';
               
-            const bgColor = match_percentage >= 80 ? 'bg-emerald-50' : match_percentage >= 60 ? 'bg-amber-50' : 'bg-slate-50';
+            const bgColor = matchPercentage >= 80 ? 'bg-emerald-50' : matchPercentage >= 60 ? 'bg-amber-50' : 'bg-slate-50';
 
             return (
-              <div key={job.id} className="glass-panel hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden flex flex-col group">
+              <div key={jobId} className="glass-panel hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden flex flex-col group">
                 <div className="p-6 flex-1">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -133,19 +137,20 @@ export default function Recommendations() {
                     </div>
                     
                     <div className={`shrink-0 w-14 h-14 rounded-full border-4 flex items-center justify-center font-bold text-lg ${ringColor} ${bgColor}`}>
-                      {match_percentage}%
+                      {Math.round(matchPercentage)}%
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-4 text-sm text-slate-500 mb-6">
-                    <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full">
-                      <DollarSign className="w-3.5 h-3.5" />
-                      {job.salary_range}
-                    </div>
+                  <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-6">
+                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+                      Skills {breakdown?.skills ?? 0}/60
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-semibold text-indigo-700">
+                      Academic {breakdown?.academic ?? 0}/20
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700">
+                      Semantic {breakdown?.semantic ?? 0}/20
+                    </span>
                   </div>
 
                   <p className="text-slate-600 text-sm leading-relaxed mb-6">
@@ -155,8 +160,12 @@ export default function Recommendations() {
                   <div className="space-y-3">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Why you matched</h4>
                     <ul className="space-y-2">
-                      {match_details.slice(0, 3).map((detail, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                      {[
+                        `${Math.round(matchPercentage)}% overall readiness for ${job.title}`,
+                        breakdown?.academic === 20 ? 'Meets the CGPA threshold for this role.' : 'Below the listed CGPA threshold for this role.',
+                        missingSkills.length ? `Missing skills: ${missingSkills.join(', ')}` : 'No hard-skill gaps detected for this listing.',
+                      ].map((detail, i) => (
+                        <li key={`${jobId}-${i}`} className="flex items-start gap-2 text-sm text-slate-600">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                           <span>{detail}</span>
                         </li>
@@ -167,12 +176,12 @@ export default function Recommendations() {
                 
                 <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
-                    {job.required_skills.slice(0, 3).map(skill => (
+                    {(job.required_skills || []).slice(0, 3).map(skill => (
                       <span key={skill} className="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-md whitespace-nowrap">
                         {skill}
                       </span>
                     ))}
-                    {job.required_skills.length > 3 && (
+                    {(job.required_skills || []).length > 3 && (
                       <span className="text-xs font-medium text-slate-400 px-1">+{job.required_skills.length - 3}</span>
                     )}
                   </div>
@@ -180,17 +189,21 @@ export default function Recommendations() {
                   <div className="flex items-center gap-4">
                     <button 
                       onClick={() => handleTrackJob(job)}
-                      disabled={trackedJobs.has(job.id)}
-                      className={`flex items-center gap-1 text-sm font-semibold transition-all ${trackedJobs.has(job.id) ? 'text-emerald-500' : 'text-slate-500 hover:text-slate-700 cursor-pointer'}`}
+                      disabled={trackedJobs.has(jobId)}
+                      className={`flex items-center gap-1 text-sm font-semibold transition-all ${trackedJobs.has(jobId) ? 'text-emerald-500' : 'text-slate-500 hover:text-slate-700 cursor-pointer'}`}
                     >
-                      {trackedJobs.has(job.id) ? (
+                      {trackedJobs.has(jobId) ? (
                         <><CheckCircle2 className="w-4 h-4" /> Tracked</>
                       ) : (
                         <><BookmarkPlus className="w-4 h-4" /> Save to Tracker</>
                       )}
                     </button>
 
-                    <Link to={`/dashboard/roadmap/${job.id}`} className="flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 hover:gap-2 transition-all">
+                    <Link
+                      to={`/dashboard/roadmap/${jobId}`}
+                      state={{ missingSkills, matchPercentage }}
+                      className="flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 hover:gap-2 transition-all"
+                    >
                       View Roadmap <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>

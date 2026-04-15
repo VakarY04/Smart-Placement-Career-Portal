@@ -1,7 +1,17 @@
 import { Menu, Bell } from 'lucide-react';
 
 export default function Navbar() {
-  const user = JSON.parse(localStorage.getItem('user') || '{"name": "User"}');
+  let user = { name: 'User' };
+
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      user = JSON.parse(storedUser);
+    }
+  } catch {
+    localStorage.removeItem('user');
+  }
+
   const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
 
   return (

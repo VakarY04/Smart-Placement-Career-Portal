@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, AlertCircle, Loader2, GraduationCap, Building2 } from 'lucide-react';
 import { apiService } from '../services/api';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('STUDENT');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,10 +18,15 @@ export default function Signup() {
     setError('');
 
     try {
-      const data = await apiService.register(name, email, password);
+      const data = await apiService.register(name, email, password, role);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user || { name }));
-      navigate('/dashboard/resume-upload');
+      localStorage.setItem('user', JSON.stringify(data.user || { name, role }));
+      
+      if (data.user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard/resume-upload');
+      }
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -31,11 +37,38 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md glass-panel p-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent mb-2">
             Create Account
           </h1>
           <p className="text-slate-500 text-sm">Join the Smart Placement platform</p>
+        </div>
+
+        {/* Role Selection */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div 
+            onClick={() => setRole('STUDENT')}
+            className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all ${
+              role === 'STUDENT' 
+              ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-md transform scale-[1.02]' 
+              : 'border-slate-200 bg-white text-slate-500 hover:border-brand-300'
+            }`}
+          >
+            <GraduationCap className={`w-8 h-8 mb-2 ${role === 'STUDENT' ? 'text-brand-600' : 'text-slate-400'}`} />
+            <span className="font-bold">Student</span>
+          </div>
+          
+          <div 
+            onClick={() => setRole('ADMIN')}
+            className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all ${
+              role === 'ADMIN' 
+              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md transform scale-[1.02]' 
+              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-300'
+            }`}
+          >
+            <Building2 className={`w-8 h-8 mb-2 ${role === 'ADMIN' ? 'text-indigo-600' : 'text-slate-400'}`} />
+            <span className="font-bold">Placement Cell</span>
+          </div>
         </div>
 
         {error && (
@@ -94,17 +127,19 @@ export default function Signup() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 mt-4 disabled:opacity-70"
+            className={`w-full text-white font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg mt-4 disabled:opacity-70 ${
+              role === 'STUDENT' ? 'bg-brand-600 hover:bg-brand-700 shadow-brand-500/30' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'
+            }`}
           >
             {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? 'Creating Account...' : `Create ${role === 'ADMIN' ? 'Admin' : 'Account'}`}
             {!isLoading && <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to="/login" className="text-brand-600 font-semibold hover:underline">
+          <Link to={role === 'ADMIN' ? '/login?role=admin' : '/login'} className={`${role === 'ADMIN' ? 'text-indigo-600' : 'text-brand-600'} font-semibold hover:underline`}>
             Log in
           </Link>
         </p>
