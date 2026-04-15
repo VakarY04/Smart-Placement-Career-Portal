@@ -24,8 +24,8 @@ export default function ResumeUploadPage() {
   return (
     <div className="space-y-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Upload Resume</h1>
-        <p className="mt-1 text-slate-500">
+        <h1 className="text-3xl font-black text-white">Upload Resume</h1>
+        <p className="mt-1 text-slate-300">
           Upload your latest PDF resume to extract AI skills, ATS insights, and optimization suggestions.
         </p>
       </div>
@@ -33,13 +33,13 @@ export default function ResumeUploadPage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <div className="flex flex-col gap-6">
           <div className="glass-panel p-6">
-            <h2 className="mb-4 text-lg font-semibold text-slate-800">Resume File</h2>
+            <h2 className="mb-4 text-xl font-bold text-white">Resume File</h2>
             <ResumeUpload onAnalysisChange={setAnalysis} />
           </div>
 
           <div className="glass-panel p-6">
-            <h2 className="mb-2 text-lg font-semibold text-slate-800">What AI Extracts</h2>
-            <p className="text-sm leading-relaxed text-slate-500">
+            <h2 className="mb-2 text-xl font-bold text-white">What AI Extracts</h2>
+            <p className="text-sm leading-relaxed text-slate-300">
               Your resume is analyzed for categorized skills, an ATS score, and line-by-line optimization ideas that persist across sessions.
             </p>
           </div>

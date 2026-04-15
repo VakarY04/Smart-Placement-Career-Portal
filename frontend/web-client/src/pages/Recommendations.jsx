@@ -1,7 +1,35 @@
 import { useState, useEffect } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { apiService } from '../services/api';
-import { Briefcase, Building2, CheckCircle2, ChevronRight, Loader2, Sparkles, AlertCircle, BookmarkPlus } from 'lucide-react';
+import { Briefcase, Building2, CheckCircle2, ChevronRight, Sparkles, AlertCircle, BookmarkPlus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { CyberSkeleton, MagneticButton, TiltCard } from '../components/CyberMotion';
+
+function RecommendationsSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div>
+        <CyberSkeleton className="mb-3 h-8 w-72" />
+        <CyberSkeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {[1, 2, 3, 4].map((item) => (
+          <div key={item} className="glass-panel p-6">
+            <div className="mb-4 flex justify-between">
+              <div className="space-y-2 w-full">
+                <CyberSkeleton className="h-6 w-2/3" />
+                <CyberSkeleton className="h-4 w-1/3" />
+              </div>
+              <CyberSkeleton className="h-14 w-14 rounded-full" />
+            </div>
+            <CyberSkeleton className="mb-3 h-20 w-full" />
+            <CyberSkeleton className="h-10 w-40" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Recommendations() {
   const location = useLocation();
@@ -17,200 +45,158 @@ export default function Recommendations() {
         setError(null);
         const data = await apiService.getRecommendations();
         setRecommendations(data.recommendations || []);
-        
         try {
           const appsData = await apiService.getApplications();
-          const trackedIds = appsData.map(app => app.jobId);
-          setTrackedJobs(new Set(trackedIds));
+          setTrackedJobs(new Set(appsData.map((app) => app.jobId)));
         } catch (appsError) {
           console.error('Failed to load tracked applications', appsError);
         }
-
       } catch (err) {
         setError(err.message || 'Failed to load recommendations');
       } finally {
         setIsLoading(false);
       }
     };
-    
     fetchRecommendations();
   }, [location.key]);
 
   const handleTrackJob = async (jobRecord) => {
     try {
       const jobId = jobRecord.id || jobRecord._id;
-      await apiService.createApplication({
-        jobId,
-        jobTitle: jobRecord.title,
-        company: jobRecord.company,
-        status: "Applied"
-      });
-      setTrackedJobs(prev => {
-        const next = new Set(prev);
-        next.add(jobId);
-        return next;
-      });
+      await apiService.createApplication({ jobId, jobTitle: jobRecord.title, company: jobRecord.company, status: 'Applied' });
+      setTrackedJobs((prev) => new Set([...prev, jobId]));
     } catch (err) {
       console.error(err);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex flex-col justify-center items-center min-h-[60vh] text-slate-500">
-        <Loader2 className="w-12 h-12 animate-spin text-brand-500 mb-4" />
-        <p className="font-medium animate-pulse">Running AI matching engine...</p>
-      </div>
-    );
-  }
+  if (isLoading) return <RecommendationsSkeleton />;
 
   if (error) {
     if (error.includes('Profile not complete yet')) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-md mx-auto text-center">
-          <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-6">
-            <Sparkles className="w-8 h-8" />
+        <div className="glass-panel mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center p-10 text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-400/10 text-cyan-200">
+            <Sparkles className="h-8 w-8" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">Profile Incomplete</h2>
-          <p className="text-slate-500 mb-8">
-            Our AI needs a few more details about you to find the perfect job matches. Please complete your profile to unlock recommendations.
-          </p>
-          <Link to="/dashboard/profile" className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-brand-500/25">
-            Complete Profile
-          </Link>
+          <h2 className="mb-3 text-2xl font-bold text-white">Profile Incomplete</h2>
+          <p className="mb-8 text-slate-400">Our AI needs a few more details to build the match graph. Complete your profile to unlock recommendations.</p>
+          <MagneticButton as={Link} to="/dashboard/profile" className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-6 py-3 font-medium text-cyan-100">Complete Profile</MagneticButton>
         </div>
       );
     }
     return (
-      <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-3 border border-red-200">
-        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+      <div className="rounded-2xl border border-red-400/20 bg-red-500/8 p-4 text-red-300 flex items-center gap-3">
+        <AlertCircle className="h-5 w-5 shrink-0" />
         <p className="font-medium">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in-up space-y-8 pb-10">
+    <div className="space-y-8 pb-10">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-amber-500" />
+        <h2 className="flex items-center gap-2 text-3xl font-black text-white">
+          <Sparkles className="h-6 w-6 text-cyan-200" />
           AI Career Recommendations
         </h2>
-        <p className="text-slate-500 text-sm mt-1">
-          Based on your skills, CGPA, and experiences, these roles are the highest numerical matches for your profile.
-        </p>
+        <p className="mt-2 text-sm text-slate-400">A cyber-minimalist map of the roles with the strongest fit against your current profile.</p>
       </div>
 
       {recommendations.length === 0 ? (
-        <div className="glass-panel p-10 text-center flex flex-col items-center">
-          <Briefcase className="w-12 h-12 text-slate-300 mb-4" />
-          <h3 className="text-lg font-semibold text-slate-700">No strong matches found</h3>
-          <p className="text-slate-500 max-w-sm mt-2">
-            Try expanding your skills or adding more context to your profile to discover new opportunities.
-          </p>
+        <div className="glass-panel flex flex-col items-center p-10 text-center">
+          <Briefcase className="mb-4 h-12 w-12 text-slate-500" />
+          <h3 className="text-lg font-semibold text-white">No strong matches found</h3>
+          <p className="mt-2 max-w-sm text-slate-400">Try expanding your skills or adding more context to your profile to surface new opportunities.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {recommendations.map((item) => {
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {recommendations.map((item, index) => {
             const { job, matchPercentage, breakdown, missingSkills = [] } = item;
             const jobId = job.id || job._id;
-            
-            // Determine ring color based on match
-            const ringColor = matchPercentage >= 80 
-              ? 'text-emerald-500 border-emerald-500' 
-              : matchPercentage >= 60 
-              ? 'text-amber-500 border-amber-500' 
-              : 'text-slate-500 border-slate-300';
-              
-            const bgColor = matchPercentage >= 80 ? 'bg-emerald-50' : matchPercentage >= 60 ? 'bg-amber-50' : 'bg-slate-50';
+            const glowColor = matchPercentage >= 80 ? 'rgba(125,255,231,0.24)' : matchPercentage >= 60 ? 'rgba(86,240,255,0.24)' : 'rgba(255,255,255,0.12)';
 
             return (
-              <div key={jobId} className="glass-panel hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden flex flex-col group">
-                <div className="p-6 flex-1">
-                  <div className="flex justify-between items-start mb-4">
+              <TiltCard
+                key={jobId}
+                className="glass-panel group flex flex-col overflow-hidden"
+                glow
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <div className="p-6">
+                  <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-brand-600 transition-colors">
-                        {job.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-slate-600 font-medium">
-                        <Building2 className="w-4 h-4 text-slate-400" />
+                      <h3 className="mb-1 text-xl font-bold text-white transition-colors group-hover:text-cyan-200">{job.title}</h3>
+                      <div className="flex items-center gap-2 font-medium text-slate-400">
+                        <Building2 className="h-4 w-4 text-slate-500" />
                         {job.company}
                       </div>
                     </div>
-                    
-                    <div className={`shrink-0 w-14 h-14 rounded-full border-4 flex items-center justify-center font-bold text-lg ${ringColor} ${bgColor}`}>
+                    <Motion.div
+                      whileHover={{ scale: 1.08 }}
+                      className="match-ring-pulse flex h-16 w-16 items-center justify-center rounded-full border text-lg font-black text-white"
+                      style={{ borderColor: glowColor, boxShadow: `0 0 24px ${glowColor}` }}
+                    >
                       {Math.round(matchPercentage)}%
-                    </div>
+                    </Motion.div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-6">
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
-                      Skills {breakdown?.skills ?? 0}/60
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-semibold text-indigo-700">
-                      Academic {breakdown?.academic ?? 0}/20
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700">
-                      Semantic {breakdown?.semantic ?? 0}/20
-                    </span>
+                  <div className="mb-6 flex flex-wrap gap-3 text-sm">
+                    <span className="rounded-full border border-cyan-300/15 bg-cyan-400/10 px-3 py-1 text-cyan-100">Skills {breakdown?.skills ?? 0}/60</span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-slate-300">Academic {breakdown?.academic ?? 0}/20</span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-slate-300">Semantic {breakdown?.semantic ?? 0}/20</span>
                   </div>
 
-                  <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                    {job.description}
-                  </p>
+                  <p className="mb-6 text-sm leading-relaxed text-slate-400">{job.description}</p>
 
                   <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Why you matched</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Why you matched</h4>
                     <ul className="space-y-2">
                       {[
                         `${Math.round(matchPercentage)}% overall readiness for ${job.title}`,
                         breakdown?.academic === 20 ? 'Meets the CGPA threshold for this role.' : 'Below the listed CGPA threshold for this role.',
                         missingSkills.length ? `Missing skills: ${missingSkills.join(', ')}` : 'No hard-skill gaps detected for this listing.',
                       ].map((detail, i) => (
-                        <li key={`${jobId}-${i}`} className="flex items-start gap-2 text-sm text-slate-600">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                        <li key={`${jobId}-${i}`} className="flex items-start gap-2 text-sm text-slate-300">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-cyan-200" />
                           <span>{detail}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 </div>
-                
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
-                    {(job.required_skills || []).slice(0, 3).map(skill => (
-                      <span key={skill} className="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-md whitespace-nowrap">
-                        {skill}
-                      </span>
+
+                <div className="border-t border-white/8 bg-white/[0.02] px-6 py-4">
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {(job.required_skills || []).slice(0, 3).map((skill) => (
+                      <span key={skill} className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-medium text-slate-300">{skill}</span>
                     ))}
-                    {(job.required_skills || []).length > 3 && (
-                      <span className="text-xs font-medium text-slate-400 px-1">+{job.required_skills.length - 3}</span>
-                    )}
+                    {(job.required_skills || []).length > 3 && <span className="px-1 text-xs font-medium text-slate-500">+{job.required_skills.length - 3}</span>}
                   </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <button 
+
+                  <div className="flex items-center justify-between gap-4">
+                    <MagneticButton
+                      type="button"
                       onClick={() => handleTrackJob(job)}
                       disabled={trackedJobs.has(jobId)}
-                      className={`flex items-center gap-1 text-sm font-semibold transition-all ${trackedJobs.has(jobId) ? 'text-emerald-500' : 'text-slate-500 hover:text-slate-700 cursor-pointer'}`}
+                      className={`inline-flex items-center gap-2 text-sm font-semibold ${trackedJobs.has(jobId) ? 'text-cyan-200' : 'text-slate-300'}`}
                     >
-                      {trackedJobs.has(jobId) ? (
-                        <><CheckCircle2 className="w-4 h-4" /> Tracked</>
-                      ) : (
-                        <><BookmarkPlus className="w-4 h-4" /> Save to Tracker</>
-                      )}
-                    </button>
+                      {trackedJobs.has(jobId) ? <><CheckCircle2 className="h-4 w-4" /> Tracked</> : <><BookmarkPlus className="h-4 w-4" /> Save to Tracker</>}
+                    </MagneticButton>
 
-                    <Link
+                    <MagneticButton
+                      as={Link}
                       to={`/dashboard/roadmap/${jobId}`}
                       state={{ missingSkills, matchPercentage, targetRole: job.title, company: job.company }}
-                      className="flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 hover:gap-2 transition-all"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-cyan-100"
                     >
-                      View Roadmap <ChevronRight className="w-4 h-4" />
-                    </Link>
+                      View Roadmap <ChevronRight className="h-4 w-4" />
+                    </MagneticButton>
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             );
           })}
         </div>

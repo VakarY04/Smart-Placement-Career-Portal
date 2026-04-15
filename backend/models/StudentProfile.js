@@ -12,6 +12,8 @@ const profileSchema = new mongoose.Schema({
 
   collegeName: String,
 
+  profileImage: String,
+
   skills: [String],
 
   interests: [String],

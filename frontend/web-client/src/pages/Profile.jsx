@@ -50,6 +50,7 @@ export default function Profile() {
     bio: '',
     cgpa: '',
     collegeName: '',
+    profileImage: '',
     skills: [],
     interests: '',
     certifications: '',
@@ -89,11 +90,13 @@ export default function Profile() {
         bio: Array.isArray(data.bio) ? data.bio.join('\n') : data.bio || '',
         cgpa: data.cgpa || '',
         collegeName: data.collegeName || '',
+        profileImage: data.profileImage || '',
         skills: normalizeArray(data.skills),
         interests: normalizeArray(data.interests).join(', '),
         certifications: normalizeArray(data.certifications).join(', '),
         experiences: experiences.length ? experiences : [emptyExperience],
       });
+      setProfilePreview(data.profileImage || '');
       setIsExistingProfile(true);
     } catch (error) {
       if (error?.message === 'Profile not found' || error?.status === 404 || String(error).includes('404')) {
@@ -174,7 +177,13 @@ export default function Profile() {
   const handleProfilePreview = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setProfilePreview(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = typeof reader.result === 'string' ? reader.result : '';
+      setProfilePreview(imageData);
+      setFormData(prev => ({ ...prev, profileImage: imageData }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
@@ -194,6 +203,7 @@ export default function Profile() {
       bio: formData.bio.trim(),
       cgpa: Number(formData.cgpa) || 0,
       collegeName: formData.collegeName.trim(),
+      profileImage: formData.profileImage,
       skills: formData.skills,
       interests: normalizeArray(formData.interests),
       internships: cleanExperiences.map(formatExperienceSummary).filter(Boolean),
@@ -239,11 +249,22 @@ export default function Profile() {
                   ) : (
                     <UserCircle2 className="h-16 w-16 text-slate-300" />
                   )}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleProfilePreview} />
-                  <span className="absolute inset-x-3 bottom-3 inline-flex items-center justify-center gap-1 rounded-full bg-slate-950/75 px-3 py-1 text-[11px] font-semibold text-white">
-                    <ImagePlus className="h-3.5 w-3.5" /> Upload Photo
-                  </span>
+                  <input id="profile-image-input" type="file" accept="image/*" className="hidden" onChange={handleProfilePreview} />
+                  {!profilePreview && (
+                    <span className="absolute inset-x-3 bottom-3 inline-flex items-center justify-center gap-1 rounded-full bg-slate-950/75 px-3 py-1 text-[11px] font-semibold text-white">
+                      <ImagePlus className="h-3.5 w-3.5" /> Upload Photo
+                    </span>
+                  )}
                 </label>
+                {profilePreview && (
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('profile-image-input')?.click()}
+                    className="absolute -bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-slate-950/90 px-3 py-1 text-[11px] font-semibold text-slate-200 shadow-lg transition hover:border-cyan-300/30 hover:text-white"
+                  >
+                    <ImagePlus className="h-3.5 w-3.5" /> Change
+                  </button>
+                )}
               </div>
 
               <div className="max-w-2xl">
@@ -294,13 +315,13 @@ export default function Profile() {
                   <UserCircle2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Personal Snapshot</h2>
-                  <p className="text-sm text-slate-500">Add a crisp summary recruiters and matching logic can quickly understand.</p>
+                  <h2 className="text-xl font-black text-white">Personal Snapshot</h2>
+                  <p className="text-sm text-slate-300">Add a crisp summary recruiters and matching logic can quickly understand.</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Bio</label>
+                <label className="text-sm font-semibold text-slate-200">Bio</label>
                 <textarea
                   name="bio"
                   value={formData.bio}
@@ -312,7 +333,7 @@ export default function Profile() {
               </div>
 
               <div className="mt-5 space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Interests</label>
+                <label className="text-sm font-semibold text-slate-200">Interests</label>
                 <textarea
                   name="interests"
                   value={formData.interests}
@@ -330,8 +351,8 @@ export default function Profile() {
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Academic Card</h2>
-                  <p className="text-sm text-slate-500">Keep your academic credentials easy to scan.</p>
+                  <h2 className="text-xl font-black text-white">Academic Card</h2>
+                  <p className="text-sm text-slate-300">Keep your academic credentials easy to scan.</p>
                 </div>
               </div>
 
@@ -374,8 +395,8 @@ export default function Profile() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Interactive Skill Tags</h2>
-                  <p className="text-sm text-slate-500">Type a skill and press Enter to add it to your stack.</p>
+                  <h2 className="text-xl font-black text-white">Interactive Skill Tags</h2>
+                  <p className="text-sm text-slate-300">Type a skill and press Enter to add it to your stack.</p>
                 </div>
               </div>
 
@@ -402,7 +423,7 @@ export default function Profile() {
               </div>
 
               <div className="mt-5 space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Certifications</label>
+                <label className="text-sm font-semibold text-slate-200">Certifications</label>
                 <textarea
                   name="certifications"
                   value={formData.certifications}
@@ -421,8 +442,8 @@ export default function Profile() {
                     <Briefcase className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900">Structured Experience List</h2>
-                    <p className="text-sm text-slate-500">Add internships, projects, and role-based experience as clean cards.</p>
+                    <h2 className="text-xl font-black text-white">Structured Experience List</h2>
+                    <p className="text-sm text-slate-300">Add internships, projects, and role-based experience as clean cards.</p>
                   </div>
                 </div>
 

@@ -58,8 +58,8 @@ export default function Applications() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col justify-center items-center h-[60vh] text-slate-500">
-        <Loader2 className="w-10 h-10 animate-spin text-brand-500 mb-4" />
+      <div className="flex-1 flex flex-col justify-center items-center h-[60vh] text-slate-400">
+        <Loader2 className="w-10 h-10 animate-spin text-cyan-300 mb-4" />
         <p className="font-medium animate-pulse">Loading Tracker...</p>
       </div>
     );
@@ -68,30 +68,30 @@ export default function Applications() {
   return (
     <div className="animate-fade-in-up space-y-8 pb-10 h-full flex flex-col">
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-800 mb-2">My Applications</h1>
-        <p className="text-slate-500 font-medium">Drag and drop job cards to systematically track your interview pipeline.</p>
+        <h1 className="text-3xl font-extrabold text-white mb-2">My Applications</h1>
+        <p className="text-slate-300 font-medium">Drag and drop job cards to systematically track your interview pipeline.</p>
       </div>
 
       <div className="flex gap-6 overflow-x-auto pb-6 h-full min-h-[650px] custom-scrollbar">
         {COLUMNS.map(col => {
           const columnApps = apps.filter(a => a.status === col);
           
-          let colTheme = "bg-slate-100/50 border-slate-200/60";
-          let badgeTheme = "bg-slate-200 text-slate-600";
+          let colTheme = "bg-white/[0.04] border-white/10";
+          let badgeTheme = "bg-white/10 text-slate-200";
           
-          if (col === "Interviewing") { colTheme = "bg-indigo-50/50 border-indigo-100/60"; badgeTheme = "bg-indigo-100 text-indigo-700"; }
-          if (col === "Offered") { colTheme = "bg-emerald-50/50 border-emerald-100/60"; badgeTheme = "bg-emerald-100 text-emerald-700"; }
-          if (col === "Rejected") { colTheme = "bg-rose-50/50 border-rose-100/60"; badgeTheme = "bg-rose-100 text-rose-700"; }
+          if (col === "Interviewing") { colTheme = "bg-cyan-400/6 border-cyan-300/15"; badgeTheme = "bg-cyan-400/12 text-cyan-100"; }
+          if (col === "Offered") { colTheme = "bg-emerald-400/6 border-emerald-300/15"; badgeTheme = "bg-emerald-400/12 text-emerald-100"; }
+          if (col === "Rejected") { colTheme = "bg-rose-400/6 border-rose-300/15"; badgeTheme = "bg-rose-400/12 text-rose-100"; }
 
           return (
             <div 
               key={col} 
-              className={`rounded-2xl p-4 w-80 shrink-0 flex flex-col border ${colTheme} transition-colors`}
+              className={`glass-panel rounded-3xl p-4 w-80 shrink-0 flex flex-col border ${colTheme} transition-colors`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col)}
             >
               <div className="flex items-center justify-between mb-4 px-2">
-                <h3 className="font-bold text-slate-700">{col}</h3>
+                <h3 className="font-bold text-white">{col}</h3>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeTheme}`}>{columnApps.length}</span>
               </div>
               
@@ -101,7 +101,7 @@ export default function Applications() {
                     key={app._id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, app._id)}
-                    className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-brand-300 hover:shadow-md transition-all group relative"
+                    className="bg-white/[0.97] border border-white/20 p-4 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-cyan-300/50 hover:shadow-[0_0_24px_rgba(86,240,255,0.12)] transition-all group relative"
                   >
                     <button 
                       onClick={() => handleDelete(app._id)} 
@@ -112,7 +112,7 @@ export default function Applications() {
                     <div className="flex items-start gap-2">
                       <GripVertical className="w-4 h-4 text-slate-300 mt-1 shrink-0 px-0 -ml-1" />
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm leading-tight mb-1.5 pr-6">{app.jobTitle}</h4>
+                        <h4 className="font-bold text-slate-900 text-sm leading-tight mb-1.5 pr-6">{app.jobTitle}</h4>
                         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                           <Building className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate max-w-[150px]">{app.company}</span>

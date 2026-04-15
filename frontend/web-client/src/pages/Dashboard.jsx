@@ -10,7 +10,7 @@ import DashboardHome from './DashboardHome';
 
 export default function Dashboard() {
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen cyber-shell">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />

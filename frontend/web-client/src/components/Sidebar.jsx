@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, UploadCloud, FileText, Settings, LogOut, User, Briefcase, PieChart } from 'lucide-react';
+import { MagneticButton } from './CyberMotion';
 
 export default function Sidebar() {
   const menuItems = [
@@ -12,9 +13,9 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col hidden md:flex">
-      <div className="h-16 flex items-center px-6 border-b border-slate-200">
-        <div className="flex items-center gap-2 text-brand-600 font-bold text-xl tracking-tight">
+    <aside className="hidden min-h-screen w-64 flex-col border-r border-white/8 bg-black/40 md:flex">
+      <div className="flex h-16 items-center border-b border-white/8 px-6">
+        <div className="flex items-center gap-2 text-cyan-300 font-bold text-xl tracking-tight">
           <LayoutDashboard className="w-6 h-6" />
           SmartPortal
         </div>
@@ -29,8 +30,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
                 isActive
-                  ? 'bg-brand-50 text-brand-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-cyan-400/12 text-cyan-200 border border-cyan-300/20'
+                  : 'text-slate-400 hover:bg-white/6 hover:text-white'
               }`
             }
           >
@@ -40,18 +41,18 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-200">
-        <button
+      <div className="border-t border-white/8 p-4">
+        <MagneticButton
           onClick={() => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login';
           }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-300"
         >
           <LogOut className="w-5 h-5" />
           Logout
-        </button>
+        </MagneticButton>
       </div>
     </aside>
   );
