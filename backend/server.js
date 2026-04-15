@@ -3,11 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const { seedDefaultJobListings } = require("./utils/seedDefaultJobListings");
 
 const app = express();
-
-// Connect Database
-connectDB();
 
 app.use(cors());
 app.use(express.json());
@@ -18,16 +16,39 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 const fs = require("fs");
 const axios = require("axios");
 const FormData = require("form-data");
 const upload = require("./config/multer");
+const Profile = require("./models/StudentProfile");
+const JobListing = require("./models/JobListing");
+const { protect } = require("./middleware/authMiddleware");
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
 
-app.post("/api/upload-resume", upload.single("resume"), async (req, res) => {
+const normalizeResumeAnalysis = (analysis = {}) => ({
+  skills: Array.isArray(analysis.skills) ? analysis.skills.filter(Boolean) : [],
+  skillsByCategory:
+    analysis.skillsByCategory ||
+    analysis.skills_by_category ||
+    {},
+  ats_score: Number(analysis.ats_score || 0) || 0,
+  provider: analysis.provider || "unknown",
+  warning: analysis.warning || "",
+  improvement_suggestions: Array.isArray(analysis.improvement_suggestions)
+    ? analysis.improvement_suggestions
+        .map((item) => ({
+          area: item?.area || "",
+          suggestion: item?.suggestion || "",
+          example: item?.example || "",
+        }))
+        .filter((item) => item.area || item.suggestion || item.example)
+    : [],
+  analyzedAt: new Date(),
+});
+
+const ensureArray = (value) => (Array.isArray(value) ? value : []);
+
+app.post("/api/upload-resume", protect, upload.single("resume"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No PDF file uploaded" });
   }
@@ -38,30 +59,64 @@ app.post("/api/upload-resume", upload.single("resume"), async (req, res) => {
     const formData = new FormData();
     formData.append("file", fileStream, req.file.originalname);
 
-    const aiResponse = await axios.post("http://127.0.0.1:8000/parse-resume", formData, {
+    const aiResponse = await axios.post(`${AI_SERVICE_URL}/parse-resume`, formData, {
       headers: {
         ...formData.getHeaders(),
       },
     });
 
-    const skills = aiResponse.data.skills || [];
-    const ats = aiResponse.data.ats || null;
-    
+    const analysis = normalizeResumeAnalysis(aiResponse.data);
+
+    const existingProfile = await Profile.findOne({ user: req.user.id });
+    const mergedSkills = Array.from(
+      new Set([...(ensureArray(existingProfile?.skills)), ...analysis.skills])
+    );
+
+    await Profile.findOneAndUpdate(
+      { user: req.user.id },
+      {
+        $set: {
+          resumeAnalysis: analysis,
+          resume: [req.file.path],
+          skills: mergedSkills,
+        },
+        $setOnInsert: {
+          user: req.user.id,
+          bio: [],
+          interests: [],
+          internships: [],
+          experiences: [],
+          certifications: [],
+        },
+      },
+      { new: true, upsert: true }
+    );
+
     res.json({
-      message: "Skills extracted successfully",
-      skills: skills,
-      ats: ats
+      message: "Resume analyzed successfully",
+      analysis,
     });
   } catch (error) {
+    if (error.response?.data) {
+      console.error("AI Service Error Payload:", error.response.data);
+    }
     console.error("AI Service Error:", error.message);
-    res.status(500).json({ message: "Failed to extract skills", error: error.message });
+    res.status(500).json({ message: "Failed to analyze resume", error: error.message });
   }
 });
 
-const Profile = require("./models/StudentProfile");
-const JobListing = require("./models/JobListing");
-const { protect } = require("./middleware/authMiddleware");
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
+app.get("/api/resume/latest", protect, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user.id }, "resumeAnalysis");
+    if (!profile?.resumeAnalysis) {
+      return res.status(404).json({ message: "No resume analysis found" });
+    }
+
+    res.json(profile.resumeAnalysis);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch latest resume analysis", error: error.message });
+  }
+});
 
 const buildStudentPayload = (profile) => ({
   cgpa: Number(profile.cgpa) || 0,
@@ -219,3 +274,22 @@ const profileRoutes = require("./routes/profileRoutes");
 app.use("/api/profile", profileRoutes);
 
 app.use("/uploads", express.static("uploads"));
+
+async function startServer() {
+  await connectDB();
+
+  try {
+    const seedResult = await seedDefaultJobListings();
+    console.log(
+      `Default job listings synced. Inserted: ${seedResult.insertedCount}, updated: ${seedResult.updatedCount}, total defaults: ${seedResult.totalDefaults}.`
+    );
+  } catch (error) {
+    console.error("Failed to seed default job listings:", error.message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+startServer();

@@ -51,7 +51,7 @@ export default function Applications() {
     setApps(prevApps => prevApps.filter(a => a._id !== id));
     try {
       await apiService.deleteApplication(id);
-    } catch(err) {
+    } catch {
       fetchApps();
     }
   };

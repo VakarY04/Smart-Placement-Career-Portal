@@ -6,3 +6,5 @@ pdfplumber
 sentence-transformers
 scikit-learn
 torch
+python-dotenv
+requests

@@ -55,6 +55,15 @@ export const apiService = {
     }
   },
 
+  getLatestResumeAnalysis: async () => {
+    try {
+      const response = await apiClient.get('/resume/latest');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // --- Profile endpoints ---
   getProfile: async () => {
     try {

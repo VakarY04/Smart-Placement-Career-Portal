@@ -22,7 +22,9 @@ export default function Recommendations() {
           const appsData = await apiService.getApplications();
           const trackedIds = appsData.map(app => app.jobId);
           setTrackedJobs(new Set(trackedIds));
-        } catch {}
+        } catch (appsError) {
+          console.error('Failed to load tracked applications', appsError);
+        }
 
       } catch (err) {
         setError(err.message || 'Failed to load recommendations');

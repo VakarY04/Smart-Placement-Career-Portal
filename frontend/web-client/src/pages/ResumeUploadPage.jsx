@@ -1,37 +1,52 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ResumeUpload from '../components/ResumeUpload';
 import SkillsDisplay from '../components/SkillsDisplay';
+import { apiService } from '../services/api';
 
 export default function ResumeUploadPage() {
-  const [extractedSkills, setExtractedSkills] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
 
-  // Callback to receive skills from the child upload component
-  const handleSkillsExtracted = (skills) => {
-    setExtractedSkills(skills);
-  };
+  useEffect(() => {
+    const fetchLatestAnalysis = async () => {
+      try {
+        const latestAnalysis = await apiService.getLatestResumeAnalysis();
+        setAnalysis(latestAnalysis);
+      } catch (error) {
+        if (!(error?.status === 404 || String(error).includes('404'))) {
+          console.error('Failed to load latest resume analysis', error);
+        }
+      }
+    };
+
+    fetchLatestAnalysis();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">Upload Resume</h1>
-        <p className="text-slate-500 mt-1">
-          Upload your latest PDF resume to extract skills and match with career paths automatically.
+        <p className="mt-1 text-slate-500">
+          Upload your latest PDF resume to extract AI skills, ATS insights, and optimization suggestions.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <div className="flex flex-col gap-6">
           <div className="glass-panel p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">Resume File</h2>
-            <ResumeUpload onSkillsExtracted={handleSkillsExtracted} />
+            <h2 className="mb-4 text-lg font-semibold text-slate-800">Resume File</h2>
+            <ResumeUpload onAnalysisChange={setAnalysis} />
+          </div>
+
+          <div className="glass-panel p-6">
+            <h2 className="mb-2 text-lg font-semibold text-slate-800">What AI Extracts</h2>
+            <p className="text-sm leading-relaxed text-slate-500">
+              Your resume is analyzed for categorized skills, an ATS score, and line-by-line optimization ideas that persist across sessions.
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="glass-panel p-6 min-h-[400px]">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">Extracted Skills</h2>
-            <SkillsDisplay skills={extractedSkills} />
-          </div>
+        <div className="glass-panel min-h-[400px] p-6">
+          <SkillsDisplay analysis={analysis} />
         </div>
       </div>
     </div>

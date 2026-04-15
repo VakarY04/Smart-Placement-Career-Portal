@@ -11,14 +11,15 @@ def extract_text(file_path):
     with pdfplumber.open(file_path) as pdf:
         for page in pdf.pages:
             text += page.extract_text() or ""
-    return text.lower()
+    return text
 
 
 def extract_skills(text):
+    normalized_text = (text or "").lower()
     found_skills = []
 
     for skill in SKILLS_DB:
-        if skill in text:
+        if skill in normalized_text:
             found_skills.append(skill)
 
     return list(set(found_skills))

@@ -1,10 +1,11 @@
 from fastapi import FastAPI, UploadFile, File
 import shutil
-from resume_parser import extract_text, extract_skills
+from resume_parser import extract_text
 from recommendation_engine import get_recommendations
 from roadmap_engine import generate_roadmap
-from ats_engine import analyze_ats
 from match_engine import analyze_match, analyze_matches, get_embedding_model
+from gemini_resume_analyzer import analyze_resume_with_gemini
+from fallback_resume_analyzer import analyze_resume_locally
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -50,20 +51,20 @@ class AnalyzeMatchesRequest(BaseModel):
 
 @app.post("/parse-resume")
 async def parse_resume(file: UploadFile = File(...)):
-    
     file_path = f"temp_{file.filename}"
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     text = extract_text(file_path)
-    skills = extract_skills(text)
-    ats_analysis = analyze_ats(text)
-
-    return {
-        "skills": skills,
-        "ats": ats_analysis
-    }
+    try:
+        gemini_analysis = analyze_resume_with_gemini(text)
+        gemini_analysis["provider"] = "ai"
+        return gemini_analysis
+    except Exception as exc:
+        fallback_analysis = analyze_resume_locally(text)
+        fallback_analysis["warning"] = str(exc)
+        return fallback_analysis
 
 @app.post("/recommend")
 async def recommend_jobs(profile: StudentProfileRequest):
