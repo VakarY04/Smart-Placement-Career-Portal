@@ -111,6 +111,15 @@ export const apiService = {
     }
   },
 
+  generateRoadmap: async ({ missingSkills, targetRole }) => {
+    try {
+      const response = await apiClient.post('/roadmap/generate', { missingSkills, targetRole });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   getApplications: async () => {
     const res = await apiClient.get('/applications');
     return res.data;

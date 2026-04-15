@@ -203,7 +203,7 @@ export default function Recommendations() {
 
                     <Link
                       to={`/dashboard/roadmap/${jobId}`}
-                      state={{ missingSkills, matchPercentage }}
+                      state={{ missingSkills, matchPercentage, targetRole: job.title, company: job.company }}
                       className="flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 hover:gap-2 transition-all"
                     >
                       View Roadmap <ChevronRight className="w-4 h-4" />

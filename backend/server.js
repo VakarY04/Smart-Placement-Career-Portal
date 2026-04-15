@@ -24,6 +24,7 @@ const Profile = require("./models/StudentProfile");
 const JobListing = require("./models/JobListing");
 const { protect } = require("./middleware/authMiddleware");
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
+const { generateGroqRoadmap } = require("./utils/groqRoadmapGenerator");
 
 const normalizeResumeAnalysis = (analysis = {}) => ({
   skills: Array.isArray(analysis.skills) ? analysis.skills.filter(Boolean) : [],
@@ -190,15 +191,38 @@ app.get("/api/roadmap/:jobId", protect, async (req, res) => {
     };
 
     const aiResponse = await axios.post(`${AI_SERVICE_URL}/roadmap`, payload);
+    const missingSkills = aiResponse.data?.missingSkills || aiResponse.data?.missing_skills || [];
+    const roadmap = await generateGroqRoadmap({
+      missingSkills,
+      targetRole: jobListing.title,
+    });
     
     if (aiResponse.data.error) {
       return res.status(400).json({ message: aiResponse.data.error });
     }
     
-    res.json(aiResponse.data);
+    res.json({
+      ...aiResponse.data,
+      roadmap,
+    });
 
   } catch (error) {
     console.error("AI Roadmap Error:", error.message);
+    res.status(500).json({ message: "Failed to generate roadmap", error: error.message });
+  }
+});
+
+app.post("/api/roadmap/generate", protect, async (req, res) => {
+  try {
+    const { missingSkills = [], targetRole = "" } = req.body || {};
+
+    if (!Array.isArray(missingSkills) || !targetRole) {
+      return res.status(400).json({ message: "missingSkills array and targetRole are required" });
+    }
+
+    const roadmap = await generateGroqRoadmap({ missingSkills, targetRole });
+    res.json({ roadmap });
+  } catch (error) {
     res.status(500).json({ message: "Failed to generate roadmap", error: error.message });
   }
 });
