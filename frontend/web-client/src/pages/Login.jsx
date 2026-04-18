@@ -1,16 +1,76 @@
-import { useMemo, useState } from 'react';
+import { createElement, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, AlertCircle, Loader2, ShieldCheck, GraduationCap } from 'lucide-react';
+import { motion as Motion } from 'framer-motion';
+import { Mail, Lock, AlertCircle, ShieldCheck, GraduationCap } from 'lucide-react';
 import { apiService } from '../services/api';
+
+function RoleToggle({ active, href, icon: Icon, label }) {
+  const isActive = active;
+
+  return (
+    <Link
+      to={href}
+      className={`relative rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+        isActive
+          ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100 shadow-[0_0_26px_rgba(34,211,238,0.18)]'
+          : 'border-white/10 bg-white/[0.03] text-slate-300 hover:border-cyan-300/20 hover:text-white'
+      }`}
+    >
+      <span className="flex items-center justify-center gap-2">
+        {createElement(Icon, { className: 'h-4 w-4' })}
+        {label}
+      </span>
+      {isActive && <span className="pointer-events-none absolute inset-0 rounded-2xl border border-cyan-300/50" />}
+    </Link>
+  );
+}
+
+function AuthInput({ label, icon: Icon, type, value, onChange, placeholder, scanKey }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-slate-300">{label}</label>
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition focus-within:border-cyan-300/50 focus-within:shadow-[0_0_22px_rgba(34,211,238,0.18)]">
+        {createElement(Icon, { className: 'absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400' })}
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          required
+          className="w-full bg-transparent py-3 pl-11 pr-4 text-white outline-none placeholder:text-slate-500"
+          placeholder={placeholder}
+        />
+        {scanKey > 0 && <span key={scanKey} className="auth-scan-line" />}
+      </div>
+    </div>
+  );
+}
+
+function DecryptLoader() {
+  return (
+    <div className="relative h-4 w-4">
+      <Motion.span
+        className="absolute inset-0 border border-white/70"
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
+      />
+      <Motion.span
+        className="absolute inset-[3px] border border-cyan-200"
+        animate={{ rotate: -360 }}
+        transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
+      />
+    </div>
+  );
+}
 
 export default function Login() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const isAdminLogin = useMemo(() => new URLSearchParams(location.search).get('role') === 'admin', [location.search]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const isAdminLogin = useMemo(() => new URLSearchParams(location.search).get('role') === 'admin', [location.search]);
+  const [scanKey, setScanKey] = useState({ email: 0, password: 0 });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,10 +85,9 @@ export default function Login() {
         throw new Error('This login is reserved for admins with the ADMIN role.');
       }
 
-      // Store token
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user || { name: 'User' }));
-      // Navigate to respective dashboard
+
       if (normalizedRole === 'ADMIN') {
         navigate('/admin/dashboard');
       } else {
@@ -42,93 +101,84 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md glass-panel p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-            {isAdminLogin ? 'Admin Sign In' : 'Welcome Back'}
-          </h1>
-          <p className="text-slate-500 text-sm">
-            {isAdminLogin ? 'JWT access must resolve to the ADMIN role.' : 'Sign in to your account'}
+    <div className="relative min-h-screen overflow-hidden bg-[#030303] px-4 py-10">
+      <div className="auth-grid-overlay" />
+      <div className="relative z-10 flex min-h-[calc(100vh-5rem)] items-center justify-center">
+        <Motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 24 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+          className="breathing-cyan w-full max-w-md rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl"
+        >
+          <div className="mb-8 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.35em] text-cyan-200">Cyber-Entry Portal</p>
+            <h1 className="text-3xl font-black text-white">{isAdminLogin ? 'Admin Access' : 'Welcome Back'}</h1>
+            <p className="mt-2 text-sm text-slate-400">{isAdminLogin ? 'Authenticate with elevated placement-cell privileges.' : 'Authenticate to enter the student command surface.'}</p>
+          </div>
+
+          <div className="mb-6 grid grid-cols-2 gap-3">
+            <RoleToggle active={!isAdminLogin} href="/login" icon={GraduationCap} label="Student" />
+            <RoleToggle active={isAdminLogin} href="/login?role=admin" icon={ShieldCheck} label="Admin" />
+          </div>
+
+          {error && (
+            <div className="mb-6 flex items-start gap-2 rounded-2xl border border-red-400/20 bg-red-500/8 p-3 text-sm text-red-300">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <AuthInput
+              label="Email"
+              icon={Mail}
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setScanKey((prev) => ({ ...prev, email: prev.email + 1 }));
+              }}
+              placeholder="you@example.com"
+              scanKey={scanKey.email}
+            />
+
+            <AuthInput
+              label="Password"
+              icon={Lock}
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setScanKey((prev) => ({ ...prev, password: prev.password + 1 }));
+              }}
+              placeholder="••••••••"
+              scanKey={scanKey.password}
+            />
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 font-semibold text-white shadow-[0_0_24px_rgba(34,211,238,0.24)] transition hover:shadow-[0_0_32px_rgba(34,211,238,0.34)] disabled:opacity-70 animate-pulse"
+            >
+              <span className="flex items-center justify-center gap-2">
+                {isLoading ? (
+                  <>
+                    <DecryptLoader /> Decrypting...
+                  </>
+                ) : (
+                  'Enter Portal'
+                )}
+              </span>
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-slate-400">
+            Don&apos;t have an account?{' '}
+            <Link to="/signup" className="font-semibold text-cyan-200 hover:text-white">
+              Sign up
+            </Link>
           </p>
-        </div>
-
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <Link
-            to="/login"
-            className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${!isAdminLogin ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 bg-white text-slate-500 hover:border-brand-300'}`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Student
-            </span>
-          </Link>
-          <Link
-            to="/login?role=admin"
-            className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${isAdminLogin ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-300'}`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <ShieldCheck className="h-4 w-4" />
-              Admin
-            </span>
-          </Link>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <p>{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
-                placeholder="you@example.com"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full text-white font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-70 ${isAdminLogin ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30 hover:shadow-indigo-500/50' : 'bg-brand-600 hover:bg-brand-700 shadow-brand-500/30 hover:shadow-brand-500/50'}`}
-          >
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isLoading ? 'Signing In...' : 'Sign In'}
-            {!isLoading && <ArrowRight className="w-4 h-4" />}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-slate-600">
-          Don't have an account?{' '}
-          <Link to="/signup" className={`${isAdminLogin ? 'text-indigo-600' : 'text-brand-600'} font-semibold hover:underline`}>
-            Sign up
-          </Link>
-        </p>
+        </Motion.div>
       </div>
     </div>
   );
