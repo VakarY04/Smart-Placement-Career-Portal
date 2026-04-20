@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -54,6 +57,25 @@ function PublicOnlyRoute({ children }) {
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('portal-theme') || 'dark');
+
+  useEffect(() => {
+    const nextTheme = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.classList.toggle('theme-light', nextTheme === 'light');
+    document.documentElement.classList.toggle('theme-dark', nextTheme === 'dark');
+    document.documentElement.style.colorScheme = nextTheme;
+    localStorage.setItem('portal-theme', nextTheme);
+  }, [theme]);
+
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      setTheme(event.detail?.theme === 'light' ? 'light' : 'dark');
+    };
+
+    window.addEventListener('portal-theme-change', handleThemeChange);
+    return () => window.removeEventListener('portal-theme-change', handleThemeChange);
+  }, []);
+
   return (
     <Router>
       <div className="cyber-shell min-h-screen text-slate-100 font-sans">
@@ -75,6 +97,12 @@ function App() {
               <Signup />
             </PublicOnlyRoute>
           } />
+          <Route path="/forgot-password" element={
+            <PublicOnlyRoute>
+              <ForgotPassword />
+            </PublicOnlyRoute>
+          } />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/dashboard/*" element={
             <ProtectedRoute requiredRole="STUDENT">
               <Dashboard />

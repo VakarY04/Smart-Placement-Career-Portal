@@ -155,6 +155,12 @@ export default function Login() {
               scanKey={scanKey.password}
             />
 
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm font-semibold text-cyan-200 hover:text-white">
+                Forgot password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}

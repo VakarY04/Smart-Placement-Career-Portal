@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
     default: "STUDENT",
     set: (value) => (typeof value === "string" ? value.toUpperCase() : value),
   },
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpire: {
+    type: Date,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

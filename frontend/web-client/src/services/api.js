@@ -37,6 +37,24 @@ export const apiService = {
     }
   },
 
+  forgotPassword: async (email) => {
+    try {
+      const response = await apiClient.post('/auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  resetPassword: async (token, password) => {
+    try {
+      const response = await apiClient.put(`/auth/reset-password/${token}`, { password });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // --- Resume & AI endpoints ---
   uploadResume: async (file) => {
     const formData = new FormData();

@@ -16,12 +16,24 @@
     color-scheme: dark;
   }
 
+  html.theme-light {
+    color-scheme: light;
+  }
+
   body {
     @apply antialiased text-slate-100;
     background:
       radial-gradient(circle at top left, rgba(24, 215, 255, 0.08), transparent 26%),
       radial-gradient(circle at top right, rgba(111, 255, 233, 0.08), transparent 22%),
       linear-gradient(180deg, #090909 0%, #050505 100%);
+  }
+
+  html.theme-light body {
+    color: #0f172a;
+    background:
+      radial-gradient(circle at top left, rgba(6, 182, 212, 0.14), transparent 28%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 24%),
+      linear-gradient(180deg, #f8fafc 0%, #eef6fb 100%);
   }
 
   a, button {
@@ -36,6 +48,15 @@
     #050505;
 }
 
+.theme-light .cyber-shell {
+  color: #0f172a;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.78), transparent 30%),
+    radial-gradient(circle at 18% 18%, rgba(6, 182, 212, 0.13), transparent 22%),
+    radial-gradient(circle at 82% 12%, rgba(59, 130, 246, 0.09), transparent 18%),
+    #f8fafc;
+}
+
 .glass-panel {
   position: relative;
   overflow: hidden;
@@ -48,6 +69,74 @@
     0 24px 60px rgba(0, 0, 0, 0.36),
     inset 0 1px 0 rgba(255,255,255,0.06);
   backdrop-filter: blur(22px);
+}
+
+.theme-light .glass-panel {
+  border-color: rgba(15, 23, 42, 0.08);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.7)) padding-box,
+    linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(15, 23, 42, 0.08), transparent 70%) border-box;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.theme-light .glass-panel::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.45), transparent 34%);
+}
+
+.theme-light .cyber-shell header,
+.theme-light .cyber-shell aside {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  background: rgba(255, 255, 255, 0.74) !important;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+}
+
+.theme-light .cyber-shell [class*="bg-black/"],
+.theme-light .cyber-shell [class*="bg-slate-950"] {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.theme-light .cyber-shell [class*="bg-white/"] {
+  background-color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.theme-light .cyber-shell [class*="border-white/"] {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.theme-light .cyber-shell .text-white,
+.theme-light .cyber-shell .text-slate-100,
+.theme-light .cyber-shell .text-slate-200 {
+  color: #0f172a !important;
+}
+
+.theme-light .cyber-shell .text-slate-300,
+.theme-light .cyber-shell .text-slate-400,
+.theme-light .cyber-shell .text-slate-500 {
+  color: #475569 !important;
+}
+
+.theme-light .cyber-shell input,
+.theme-light .cyber-shell textarea,
+.theme-light .cyber-shell select {
+  color: #0f172a;
+  background-color: rgba(255, 255, 255, 0.82);
+}
+
+.theme-light .cyber-shell input::placeholder,
+.theme-light .cyber-shell textarea::placeholder {
+  color: #94a3b8;
+}
+
+.theme-light .cyber-skeleton {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.theme-light .holographic-text {
+  background: linear-gradient(90deg, #0f172a 0%, #0891b2 45%, #0f172a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .glass-panel::before {

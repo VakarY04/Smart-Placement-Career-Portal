@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, UploadCloud, FileText, Settings, LogOut, User, Briefcase, PieChart } from 'lucide-react';
+import { LayoutDashboard, UploadCloud, FileText, LogOut, User, Briefcase, PieChart } from 'lucide-react';
 import { MagneticButton } from './CyberMotion';
 
 export default function Sidebar() {
@@ -9,7 +9,6 @@ export default function Sidebar() {
     { name: 'My Profile', icon: User, path: '/dashboard/profile' },
     { name: 'My Matches', icon: Briefcase, path: '/dashboard/recommendations' },
     { name: 'My Applications', icon: FileText, path: '/dashboard/applications' },
-    { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
   ];
 
   return (

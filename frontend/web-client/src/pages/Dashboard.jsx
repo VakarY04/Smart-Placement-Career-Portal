@@ -23,7 +23,7 @@ export default function Dashboard() {
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/roadmap/:jobId" element={<Roadmap />} />
               <Route path="/applications" element={<Applications />} />
-              <Route path="/settings" element={<div className="glass-panel p-8 text-slate-500">Settings - Coming Soon</div>} />
+              <Route path="/settings" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </div>
         </main>
