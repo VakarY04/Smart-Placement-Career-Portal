@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -57,7 +58,12 @@ function App() {
     <Router>
       <div className="cyber-shell min-h-screen text-slate-100 font-sans">
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard/resume-upload" replace />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={
+            <PublicOnlyRoute>
+              <Login />
+            </PublicOnlyRoute>
+          } />
           <Route path="/login" element={
             <PublicOnlyRoute>
               <Login />
