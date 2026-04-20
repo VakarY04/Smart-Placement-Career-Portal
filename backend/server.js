@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const { seedDefaultJobListings } = require("./utils/seedDefaultJobListings");
+const { seedResources } = require("./utils/seedResources");
 
 const app = express();
 
@@ -24,7 +25,7 @@ const Profile = require("./models/StudentProfile");
 const JobListing = require("./models/JobListing");
 const { protect } = require("./middleware/authMiddleware");
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
-const { generateGroqRoadmap } = require("./utils/groqRoadmapGenerator");
+const { buildHydratedRoadmap, getSmartRoadmap } = require("./controllers/roadmapController");
 
 const normalizeResumeAnalysis = (analysis = {}) => ({
   skills: Array.isArray(analysis.skills) ? analysis.skills.filter(Boolean) : [],
@@ -192,7 +193,7 @@ app.get("/api/roadmap/:jobId", protect, async (req, res) => {
 
     const aiResponse = await axios.post(`${AI_SERVICE_URL}/roadmap`, payload);
     const missingSkills = aiResponse.data?.missingSkills || aiResponse.data?.missing_skills || [];
-    const roadmap = await generateGroqRoadmap({
+    const roadmap = await buildHydratedRoadmap({
       missingSkills,
       targetRole: jobListing.title,
     });
@@ -212,20 +213,7 @@ app.get("/api/roadmap/:jobId", protect, async (req, res) => {
   }
 });
 
-app.post("/api/roadmap/generate", protect, async (req, res) => {
-  try {
-    const { missingSkills = [], targetRole = "" } = req.body || {};
-
-    if (!Array.isArray(missingSkills) || !targetRole) {
-      return res.status(400).json({ message: "missingSkills array and targetRole are required" });
-    }
-
-    const roadmap = await generateGroqRoadmap({ missingSkills, targetRole });
-    res.json({ roadmap });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to generate roadmap", error: error.message });
-  }
-});
+app.post("/api/roadmap/generate", protect, getSmartRoadmap);
 
 const Application = require("./models/Application");
 
@@ -309,6 +297,15 @@ async function startServer() {
     );
   } catch (error) {
     console.error("Failed to seed default job listings:", error.message);
+  }
+
+  try {
+    const resourceSeedResult = await seedResources();
+    console.log(
+      `Resources synced. Inserted: ${resourceSeedResult.insertedCount}, updated: ${resourceSeedResult.updatedCount}, total defaults: ${resourceSeedResult.totalDefaults}.`
+    );
+  } catch (error) {
+    console.error("Failed to seed resources:", error.message);
   }
 
   app.listen(PORT, () => {

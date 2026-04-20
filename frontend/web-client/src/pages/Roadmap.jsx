@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import { apiService } from '../services/api';
-import { ArrowLeft, Briefcase, CheckCircle2, ExternalLink, Flame } from 'lucide-react';
+import { ArrowLeft, BookOpen, Briefcase, CheckCircle2, Code2, ExternalLink, Flame, GitBranch, GraduationCap, Play } from 'lucide-react';
 import { CyberSkeleton, MagneticButton } from '../components/CyberMotion';
 
 function RoadmapSkeleton() {
   return (
     <div className="space-y-6">
-      {[1, 2, 3].map((month) => (
-        <div key={month} className="glass-panel p-6">
+      {['Foundational', 'Core', 'Specialized'].map((phase) => (
+        <div key={phase} className="glass-panel border-white/10 p-6 backdrop-blur-lg">
           <CyberSkeleton className="mb-4 h-5 w-28" />
           <div className="space-y-4">
             {[1, 2].map((milestone) => (
@@ -24,6 +24,37 @@ function RoadmapSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+const platformIconMap = {
+  YouTube: Play,
+  Docs: BookOpen,
+  Udemy: GraduationCap,
+  freeCodeCamp: Code2,
+  Coursera: GraduationCap,
+  MDN: BookOpen,
+  GitHub: GitBranch,
+  Other: ExternalLink,
+};
+
+function ResourceChip({ resource }) {
+  const Icon = platformIconMap[resource.platform] || ExternalLink;
+
+  return (
+    <MagneticButton
+      as="a"
+      href={resource.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex max-w-full items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-sm font-semibold text-cyan-100 backdrop-blur-lg hover:border-cyan-300/30 hover:bg-cyan-400/10"
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="truncate">{resource.title}</span>
+      <span className="shrink-0 rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+        {resource.platform}
+      </span>
+    </MagneticButton>
   );
 }
 
@@ -53,7 +84,7 @@ export default function Roadmap() {
           job,
           is_ready: missingSkills.length === 0,
           missingSkills,
-          roadmap: generated.roadmap || [],
+          roadmap: generated.roadmap || { phases: [] },
         });
       } catch (err) {
         setError(err.message || 'Failed to generate roadmap');
@@ -64,14 +95,13 @@ export default function Roadmap() {
     fetchRoadmap();
   }, [jobId, location.state]);
 
-  const groupedRoadmap = useMemo(() => {
-    const steps = roadmapData?.roadmap || [];
-    return steps.reduce((acc, step, index) => {
-      const month = Number(step.month) || Math.min(3, Math.floor(index / 2) + 1);
-      if (!acc[month]) acc[month] = [];
-      acc[month].push(step);
-      return acc;
-    }, {});
+  const roadmapPhases = useMemo(() => {
+    const roadmap = roadmapData?.roadmap;
+    if (Array.isArray(roadmap?.phases)) {
+      return roadmap.phases;
+    }
+
+    return [];
   }, [roadmapData]);
 
   if (isLoading) {
@@ -125,40 +155,43 @@ export default function Roadmap() {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
-          {Object.entries(groupedRoadmap).map(([month, steps]) => (
-            <section key={month} className="glass-panel p-6">
+          {roadmapPhases.map((phase) => (
+            <section key={phase.name} className="glass-panel border-white/10 p-6 backdrop-blur-lg">
               <div className="mb-6">
-                <span className="inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">Month {month}</span>
+                <span className="inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">
+                  {phase.name} Phase
+                </span>
               </div>
               <div className="relative space-y-6 pl-8">
                 <div className="absolute bottom-0 left-[11px] top-0 w-[2px] bg-white/8">
                   <div className="cyber-flow-line absolute inset-0 bg-cyan-300/55" />
                 </div>
-                {steps.map((step, index) => (
-                  <div key={`${month}-${index}`} className="relative">
+                {(phase.skills || []).map((step, index) => (
+                  <div key={`${phase.name}-${step.skill}-${index}`} className="relative">
                     <Motion.div
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: index * 0.12 }}
                       className="absolute -left-8 top-5 h-6 w-6 rounded-full border border-cyan-300/30 bg-cyan-400/20 shadow-[0_0_22px_rgba(86,240,255,0.55)]"
                     />
-                    <div className="rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-6">
+                    <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-lg">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">{step.skill}</p>
                       <h3 className="mb-2 text-xl font-bold text-white">{step.milestone}</h3>
                       <p className="mb-5 text-sm leading-relaxed text-slate-400">{step.description}</p>
-                      <div className="flex flex-col gap-4 rounded-2xl border border-white/8 bg-black/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-cyan-100">Resource Link</p>
-                          <p className="text-xs text-slate-500">{step.resourceUrl}</p>
+                      <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-lg">
+                        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-cyan-100">
+                          <Play className="h-4 w-4" />
+                          Verified Resources
                         </div>
-                        <MagneticButton
-                          as="a"
-                          href={step.resourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-100"
-                        >
-                          Access Course <ExternalLink className="h-3.5 w-3.5" />
-                        </MagneticButton>
+                        {step.resources?.length ? (
+                          <div className="flex flex-wrap gap-2">
+                            {step.resources.map((resource) => (
+                              <ResourceChip key={resource.slug || resource.url} resource={resource} />
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-500">No verified resource matched this skill yet.</p>
+                        )}
                       </div>
                     </div>
                   </div>

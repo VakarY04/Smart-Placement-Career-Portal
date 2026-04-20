@@ -2,67 +2,127 @@ const axios = require("axios");
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-const GENERIC_DOC_URL = "https://developer.mozilla.org/en-US/";
+const PHASE_NAMES = ["Foundational", "Core", "Specialized"];
 
-const sanitizeRoadmapUrl = (url) => {
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-      return parsed.toString();
-    }
-    return GENERIC_DOC_URL;
-  } catch {
-    return GENERIC_DOC_URL;
-  }
+const normalizeSlug = (slug) => String(slug || "").trim().toLowerCase();
+
+const pickFallbackSlugs = (availableSlugs = [], index = 0) => {
+  const slugs = availableSlugs.map(normalizeSlug).filter(Boolean);
+  if (!slugs.length) return [];
+  return [slugs[index % slugs.length], slugs[(index + 1) % slugs.length]].filter((slug, slugIndex, array) => array.indexOf(slug) === slugIndex);
 };
 
-const buildFallbackRoadmap = (missingSkills = [], targetRole = "Target Role") => {
+const buildFallbackRoadmap = (missingSkills = [], targetRole = "Target Role", resourceSlugs = []) => {
   const fallbackSkills = missingSkills.length ? missingSkills : ["Core fundamentals", "Projects", "Interview practice"];
 
-  return fallbackSkills.slice(0, 3).flatMap((skill, index) => ([
-    {
-      month: index + 1,
-      milestone: `Learn ${skill}`,
-      description: `Study the fundamentals of ${skill} and take notes on the most important concepts for ${targetRole}.`,
-      resourceUrl: GENERIC_DOC_URL,
-    },
-    {
-      month: index + 1,
-      milestone: `Practice ${skill}`,
-      description: `Build one focused practice exercise or mini-project using ${skill} so you can demonstrate applied understanding.`,
-      resourceUrl: "https://www.freecodecamp.org/learn/",
-    },
-  ]));
+  const phases = PHASE_NAMES.map((phaseName, phaseIndex) => ({
+    name: phaseName,
+    skills: fallbackSkills
+      .filter((_, skillIndex) => skillIndex % PHASE_NAMES.length === phaseIndex)
+      .map((skill, index) => ({
+        skill: String(skill || `Skill ${index + 1}`).trim(),
+        milestone: `${phaseName}: ${skill}`,
+        description: `Build practical confidence in ${skill} for ${targetRole}, then apply it in a small portfolio-ready task.`,
+        resource_slugs: pickFallbackSlugs(resourceSlugs, phaseIndex + index),
+      })),
+  }));
+
+  const populatedPhases = phases.filter((phase) => phase.skills.length > 0);
+
+  if (populatedPhases.length) {
+    return { phases: populatedPhases };
+  }
+
+  return {
+    phases: [
+      {
+        name: "Foundational",
+        skills: [
+          {
+            skill: "Core fundamentals",
+            milestone: `Prepare for ${targetRole}`,
+            description: `Review the core concepts and build one focused practice project for ${targetRole}.`,
+            resource_slugs: pickFallbackSlugs(resourceSlugs, 0),
+          },
+        ],
+      },
+    ],
+  };
 };
 
-const parseRoadmapResponse = (content, missingSkills, targetRole) => {
+const normalizeSkillStep = (step = {}, index = 0, targetRole = "Target Role", allowedSlugSet = new Set()) => {
+  const rawSlugs = Array.isArray(step.resource_slugs)
+    ? step.resource_slugs
+    : Array.isArray(step.resourceSlugs)
+      ? step.resourceSlugs
+      : [];
+
+  const resource_slugs = rawSlugs
+    .map(normalizeSlug)
+    .filter((slug, slugIndex, array) => slug && allowedSlugSet.has(slug) && array.indexOf(slug) === slugIndex)
+    .slice(0, 3);
+
+  return {
+    skill: String(step.skill || step.milestone || `Skill ${index + 1}`).trim(),
+    milestone: String(step.milestone || step.skill || `Build milestone ${index + 1}`).trim(),
+    description: String(step.description || `Build progress toward ${targetRole}.`).trim(),
+    resource_slugs,
+  };
+};
+
+const parseRoadmapResponse = (content, missingSkills, targetRole, resourceSlugs = []) => {
+  const allowedSlugSet = new Set(resourceSlugs.map(normalizeSlug).filter(Boolean));
+
   try {
     const parsed = JSON.parse(content);
-    if (!Array.isArray(parsed)) {
-      return buildFallbackRoadmap(missingSkills, targetRole);
+    const rawPhases = Array.isArray(parsed?.phases) ? parsed.phases : [];
+
+    if (!rawPhases.length) {
+      return buildFallbackRoadmap(missingSkills, targetRole, resourceSlugs);
     }
 
-    return parsed.map((item, index) => ({
-      month: Number(item?.month) || Math.min(3, Math.floor(index / 2) + 1),
-      milestone: String(item?.milestone || `Milestone ${index + 1}`).trim(),
-      description: String(item?.description || `Build progress toward ${targetRole}.`).trim(),
-      resourceUrl: sanitizeRoadmapUrl(item?.resourceUrl),
-    }));
+    const phases = rawPhases
+      .map((phase, phaseIndex) => {
+        const skills = Array.isArray(phase?.skills) ? phase.skills : [];
+        return {
+          name: PHASE_NAMES.includes(phase?.name) ? phase.name : PHASE_NAMES[phaseIndex] || `Phase ${phaseIndex + 1}`,
+          skills: skills.map((step, index) => normalizeSkillStep(step, index, targetRole, allowedSlugSet)),
+        };
+      })
+      .filter((phase) => phase.skills.length > 0);
+
+    if (!phases.length) {
+      return buildFallbackRoadmap(missingSkills, targetRole, resourceSlugs);
+    }
+
+    return { phases };
   } catch {
-    return buildFallbackRoadmap(missingSkills, targetRole);
+    return buildFallbackRoadmap(missingSkills, targetRole, resourceSlugs);
   }
 };
 
-async function generateGroqRoadmap({ missingSkills = [], targetRole = "Target Role" }) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return buildFallbackRoadmap(missingSkills, targetRole);
-  }
+const buildSystemPrompt = ({ missingSkills = [], targetRole = "Target Role", resourceSlugs = [] }) => {
+  const allowedSlugs = resourceSlugs.map(normalizeSlug).filter(Boolean);
 
-  const systemPrompt =
-    `You are a Senior Technical Career Coach. Generate a detailed 3-month study roadmap for a student missing these skills: ${missingSkills.join(", ") || "core skills"} for the role of ${targetRole}. ` +
-    "For each month, provide 2 key milestones. For each milestone, provide a REAL, valid URL to a high-quality free resource (YouTube, official docs, or freeCodeCamp). " +
-    "Return ONLY a JSON array of objects with keys: month, milestone, description, and resourceUrl.";
+  return [
+    "You are a Senior Technical Career Coach.",
+    "Output strictly JSON format.",
+    "Do not generate URLs.",
+    `Only use the following resource_slugs in your response: [${allowedSlugs.join(", ")}].`,
+    "Organize skills into logical Phases (Foundational, Core, Specialized) rather than months.",
+    `Create a roadmap for a student missing these skills: ${missingSkills.join(", ") || "core skills"} for the role of ${targetRole}.`,
+    "Return exactly this JSON shape: { \"phases\": [{ \"name\": \"Foundational\", \"skills\": [{ \"skill\": \"Skill name\", \"milestone\": \"Milestone title\", \"description\": \"Actionable guidance\", \"resource_slugs\": [\"slug-from-list\"] }] }] }.",
+    "Use only phase names Foundational, Core, and Specialized. Each skill should include one to three resource_slugs from the allowed list.",
+  ].join(" ");
+};
+
+async function generateGroqRoadmap({ missingSkills = [], targetRole = "Target Role", resourceSlugs = [] }) {
+  const apiKey = process.env.GROQ_API_KEY;
+  const normalizedResourceSlugs = resourceSlugs.map(normalizeSlug).filter(Boolean);
+
+  if (!apiKey) {
+    return buildFallbackRoadmap(missingSkills, targetRole, normalizedResourceSlugs);
+  }
 
   try {
     const response = await axios.post(
@@ -73,14 +133,14 @@ async function generateGroqRoadmap({ missingSkills = [], targetRole = "Target Ro
         messages: [
           {
             role: "system",
-            content:
-              `${systemPrompt} Wrap the array in a JSON object as { "roadmap": [...] } and do not include any extra text.`,
+            content: buildSystemPrompt({ missingSkills, targetRole, resourceSlugs: normalizedResourceSlugs }),
           },
           {
             role: "user",
             content: JSON.stringify({
               missingSkills,
               targetRole,
+              allowed_resource_slugs: normalizedResourceSlugs,
             }),
           },
         ],
@@ -95,23 +155,10 @@ async function generateGroqRoadmap({ missingSkills = [], targetRole = "Target Ro
     );
 
     const content = response.data?.choices?.[0]?.message?.content || "{}";
-    let normalizedContent = content;
-
-    try {
-      const parsedObject = JSON.parse(content);
-      if (Array.isArray(parsedObject)) {
-        normalizedContent = JSON.stringify(parsedObject);
-      } else if (Array.isArray(parsedObject?.roadmap)) {
-        normalizedContent = JSON.stringify(parsedObject.roadmap);
-      }
-    } catch {
-      normalizedContent = content;
-    }
-
-    return parseRoadmapResponse(normalizedContent, missingSkills, targetRole);
-  } catch (error) {
-    return buildFallbackRoadmap(missingSkills, targetRole);
+    return parseRoadmapResponse(content, missingSkills, targetRole, normalizedResourceSlugs);
+  } catch {
+    return buildFallbackRoadmap(missingSkills, targetRole, normalizedResourceSlugs);
   }
 }
 
-module.exports = { generateGroqRoadmap, buildFallbackRoadmap };
+module.exports = { generateGroqRoadmap, buildFallbackRoadmap, buildSystemPrompt };
