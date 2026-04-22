@@ -28,4 +28,12 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.pre("validate", function normalizeRoleBeforeValidation(next) {
+  if (typeof this.role === "string") {
+    this.role = this.role.toUpperCase();
+  }
+
+  next();
+});
+
 module.exports = mongoose.model("User", userSchema);
