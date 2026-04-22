@@ -1,8 +1,7 @@
-from functools import lru_cache
 from typing import Dict, List
 
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def _normalize_skill(skill: str) -> str:
@@ -25,11 +24,6 @@ def _dedupe_skills(skills: List[str]) -> List[str]:
     return normalized
 
 
-@lru_cache(maxsize=1)
-def get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer("all-MiniLM-L6-v2")
-
-
 def _semantic_score(student_bio: str, job_description: str) -> float:
     student_text = (student_bio or "").strip()
     job_text = (job_description or "").strip()
@@ -37,9 +31,8 @@ def _semantic_score(student_bio: str, job_description: str) -> float:
     if not student_text or not job_text:
         return 0.0
 
-    model = get_embedding_model()
-    embeddings = model.encode([student_text, job_text])
-    similarity = float(cosine_similarity([embeddings[0]], [embeddings[1]])[0][0])
+    vectors = TfidfVectorizer(stop_words="english").fit_transform([student_text, job_text])
+    similarity = float(cosine_similarity(vectors[0], vectors[1])[0][0])
     similarity = max(0.0, min(similarity, 1.0))
 
     return round(similarity * 20, 2)
@@ -96,19 +89,18 @@ def analyze_matches(student: Dict, jobs: List[Dict]) -> List[Dict]:
     if not jobs:
         return []
 
-    model = get_embedding_model()
     student_bio = (student.get("bio", "") or "").strip()
     job_descriptions = [(job.get("description", "") or "").strip() for job in jobs]
 
     semantic_scores = []
     if student_bio and any(job_descriptions):
-        embeddings = model.encode([student_bio, *job_descriptions])
-        student_embedding = embeddings[0]
+        vectors = TfidfVectorizer(stop_words="english").fit_transform([student_bio, *job_descriptions])
+        student_vector = vectors[0]
         for index, description in enumerate(job_descriptions, start=1):
             if not description:
                 semantic_scores.append(0.0)
                 continue
-            similarity = float(cosine_similarity([student_embedding], [embeddings[index]])[0][0])
+            similarity = float(cosine_similarity(student_vector, vectors[index])[0][0])
             similarity = max(0.0, min(similarity, 1.0))
             semantic_scores.append(round(similarity * 20, 2))
     else:

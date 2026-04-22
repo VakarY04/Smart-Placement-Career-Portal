@@ -3,18 +3,13 @@ import shutil
 from resume_parser import extract_text
 from recommendation_engine import get_recommendations
 from roadmap_engine import generate_roadmap
-from match_engine import analyze_match, analyze_matches, get_embedding_model
+from match_engine import analyze_match, analyze_matches
 from gemini_resume_analyzer import analyze_resume_with_gemini
 from fallback_resume_analyzer import analyze_resume_locally
 from pydantic import BaseModel
 from typing import List, Optional
 
 app = FastAPI()
-
-
-@app.on_event("startup")
-async def warm_embedding_model():
-    get_embedding_model()
 
 class StudentProfileRequest(BaseModel):
     cgpa: float
