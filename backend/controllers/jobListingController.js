@@ -52,6 +52,20 @@ exports.getJobListings = async (req, res) => {
   }
 };
 
+exports.getLatestJobListings = async (req, res) => {
+  try {
+    const listings = await JobListing.find({ isActive: true })
+      .select("title company requiredSkills cgpaThreshold createdAt")
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean();
+
+    res.json(listings);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch latest job listings" });
+  }
+};
+
 exports.updateJobListing = async (req, res) => {
   try {
     const listing = await JobListing.findById(req.params.id);

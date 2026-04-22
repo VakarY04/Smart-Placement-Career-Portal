@@ -26,6 +26,7 @@ const JobListing = require("./models/JobListing");
 const { protect } = require("./middleware/authMiddleware");
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
 const { buildHydratedRoadmap, getSmartRoadmap } = require("./controllers/roadmapController");
+const { getLatestJobListings } = require("./controllers/jobListingController");
 
 const normalizeResumeAnalysis = (analysis = {}) => ({
   skills: Array.isArray(analysis.skills) ? analysis.skills.filter(Boolean) : [],
@@ -214,6 +215,7 @@ app.get("/api/roadmap/:jobId", protect, async (req, res) => {
 });
 
 app.post("/api/roadmap/generate", protect, getSmartRoadmap);
+app.get("/api/jobs/latest", protect, getLatestJobListings);
 
 const Application = require("./models/Application");
 
