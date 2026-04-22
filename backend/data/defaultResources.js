@@ -5,6 +5,7 @@ module.exports = [
     url: "https://react.dev/reference/react/hooks",
     platform: "Docs",
     difficulty: "Beginner",
+    topics: ["react", "react hooks", "frontend", "javascript"],
   },
   {
     slug: "react-learn",
@@ -12,6 +13,7 @@ module.exports = [
     url: "https://react.dev/learn",
     platform: "Docs",
     difficulty: "Beginner",
+    topics: ["react", "frontend", "javascript"],
   },
   {
     slug: "javascript-mdn",
@@ -19,6 +21,7 @@ module.exports = [
     url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
     platform: "MDN",
     difficulty: "Beginner",
+    topics: ["javascript", "frontend", "web"],
   },
   {
     slug: "node-express",
@@ -26,6 +29,7 @@ module.exports = [
     url: "https://expressjs.com/en/guide/routing.html",
     platform: "Docs",
     difficulty: "Intermediate",
+    topics: ["node", "node.js", "express", "backend", "api"],
   },
   {
     slug: "mongodb-node",
@@ -33,6 +37,7 @@ module.exports = [
     url: "https://www.mongodb.com/docs/drivers/node/current/quick-start/",
     platform: "Docs",
     difficulty: "Intermediate",
+    topics: ["mongodb", "database", "node", "node.js"],
   },
   {
     slug: "mongoose-docs",
@@ -40,6 +45,7 @@ module.exports = [
     url: "https://mongoosejs.com/docs/guide.html",
     platform: "Docs",
     difficulty: "Intermediate",
+    topics: ["mongoose", "mongodb", "database", "node", "node.js"],
   },
   {
     slug: "freecodecamp-js",
@@ -47,6 +53,7 @@ module.exports = [
     url: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8/",
     platform: "freeCodeCamp",
     difficulty: "Beginner",
+    topics: ["javascript", "algorithms", "data structures"],
   },
   {
     slug: "git-github",
@@ -54,6 +61,7 @@ module.exports = [
     url: "https://guides.github.com/introduction/git-handbook/",
     platform: "GitHub",
     difficulty: "Beginner",
+    topics: ["git", "github", "version control"],
   },
   {
     slug: "frontend-system-design",
@@ -61,5 +69,46 @@ module.exports = [
     url: "https://www.patterns.dev/",
     platform: "Docs",
     difficulty: "Advanced",
+    topics: ["frontend", "system design", "patterns", "architecture"],
+  },
+  {
+    slug: "selenium-docs",
+    title: "Selenium Documentation",
+    url: "https://www.selenium.dev/documentation/",
+    platform: "Docs",
+    difficulty: "Intermediate",
+    topics: ["selenium", "automation", "testing", "qa"],
+  },
+  {
+    slug: "testng-docs",
+    title: "TestNG Documentation",
+    url: "https://testng.org/",
+    platform: "Docs",
+    difficulty: "Intermediate",
+    topics: ["testng", "testing", "java", "qa"],
+  },
+  {
+    slug: "cucumber-docs",
+    title: "Cucumber Documentation",
+    url: "https://cucumber.io/docs/cucumber/",
+    platform: "Docs",
+    difficulty: "Intermediate",
+    topics: ["cucumber", "bdd", "behavior-driven development", "testing", "qa"],
+  },
+  {
+    slug: "maven-guide",
+    title: "Maven Getting Started Guide",
+    url: "https://maven.apache.org/guides/getting-started/",
+    platform: "Docs",
+    difficulty: "Intermediate",
+    topics: ["maven", "java", "build tools", "qa"],
+  },
+  {
+    slug: "jira-agile-guide",
+    title: "Jira Agile Guide",
+    url: "https://www.atlassian.com/agile/tutorials/how-to-do-scrum-with-jira",
+    platform: "Docs",
+    difficulty: "Beginner",
+    topics: ["jira", "agile", "scrum", "project management"],
   },
 ];

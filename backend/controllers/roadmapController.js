@@ -2,6 +2,44 @@ const Resource = require("../models/Resource");
 const { generateGroqRoadmap } = require("../utils/groqRoadmapGenerator");
 
 const normalizeSlug = (slug) => String(slug || "").trim().toLowerCase();
+const normalizeText = (value) => String(value || "").trim().toLowerCase();
+
+const splitSearchTerms = (values = []) =>
+  values
+    .flatMap((value) => normalizeText(value).split(/[^a-z0-9+#.]+/i))
+    .map((value) => value.trim())
+    .filter((value) => value.length >= 2);
+
+const resourceMatchesContext = (resource, contextTerms = []) => {
+  const haystack = [
+    resource.slug,
+    resource.title,
+    resource.platform,
+    resource.difficulty,
+    ...(Array.isArray(resource.topics) ? resource.topics : []),
+  ]
+    .map(normalizeText)
+    .join(" ");
+
+  return contextTerms.some((term) => {
+    const normalizedTerm = normalizeText(term);
+    return normalizedTerm && haystack.includes(normalizedTerm);
+  });
+};
+
+const buildFallbackSearchResource = (skill) => {
+  const label = String(skill || "skill").trim() || "skill";
+  const query = encodeURIComponent(`${label} official documentation tutorial`);
+
+  return {
+    slug: `search-${normalizeSlug(label).replace(/[^a-z0-9]+/g, "-") || "skill"}`,
+    title: `Search official resources for ${label}`,
+    url: `https://www.google.com/search?q=${query}`,
+    platform: "Other",
+    difficulty: "All Levels",
+    isFallbackSearch: true,
+  };
+};
 
 const collectResourceSlugs = (roadmap = {}) => {
   const slugs = new Set();
@@ -43,7 +81,7 @@ const hydrateRoadmapResources = async (roadmap = {}) => {
           skill: skill.skill,
           milestone: skill.milestone,
           description: skill.description,
-          resources: hydratedResources,
+          resources: hydratedResources.length ? hydratedResources : [buildFallbackSearchResource(skill.skill)],
         };
       }),
     })),
@@ -51,8 +89,10 @@ const hydrateRoadmapResources = async (roadmap = {}) => {
 };
 
 const buildHydratedRoadmap = async ({ missingSkills = [], targetRole = "Target Role" }) => {
-  const registryResources = await Resource.find({}, "slug").sort({ slug: 1 }).lean();
-  const resourceSlugs = registryResources.map((resource) => resource.slug).filter(Boolean);
+  const registryResources = await Resource.find({}, "slug title platform difficulty topics").sort({ slug: 1 }).lean();
+  const contextTerms = splitSearchTerms([...missingSkills, targetRole]);
+  const matchedResources = registryResources.filter((resource) => resourceMatchesContext(resource, contextTerms));
+  const resourceSlugs = matchedResources.map((resource) => resource.slug).filter(Boolean);
   const rawRoadmap = await generateGroqRoadmap({ missingSkills, targetRole, resourceSlugs });
 
   return hydrateRoadmapResources(rawRoadmap);
@@ -78,4 +118,5 @@ module.exports = {
   buildHydratedRoadmap,
   collectResourceSlugs,
   hydrateRoadmapResources,
+  resourceMatchesContext,
 };

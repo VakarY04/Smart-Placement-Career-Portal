@@ -40,6 +40,7 @@ const platformIconMap = {
 
 function ResourceChip({ resource }) {
   const Icon = platformIconMap[resource.platform] || ExternalLink;
+  const platformLabel = resource.isFallbackSearch ? 'Search' : resource.platform;
 
   return (
     <MagneticButton
@@ -52,7 +53,7 @@ function ResourceChip({ resource }) {
       <Icon className="h-4 w-4 shrink-0" />
       <span className="truncate">{resource.title}</span>
       <span className="light-pill-neutral shrink-0 rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
-        {resource.platform}
+        {platformLabel}
       </span>
     </MagneticButton>
   );

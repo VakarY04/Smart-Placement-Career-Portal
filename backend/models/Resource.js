@@ -40,6 +40,14 @@ const resourceSchema = new mongoose.Schema(
       enum: ["Beginner", "Intermediate", "Advanced", "All Levels"],
       default: "All Levels",
     },
+    topics: {
+      type: [String],
+      default: [],
+      set: (topics) =>
+        Array.isArray(topics)
+          ? topics.map((topic) => String(topic || "").trim().toLowerCase()).filter(Boolean)
+          : [],
+    },
   },
   {
     timestamps: true,

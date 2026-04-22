@@ -17,6 +17,7 @@ async function seedResources() {
       existingResource.url = resource.url;
       existingResource.platform = resource.platform;
       existingResource.difficulty = resource.difficulty;
+      existingResource.topics = resource.topics || [];
       await existingResource.save();
       updatedCount += 1;
       continue;
