@@ -72,7 +72,7 @@ export default function Applications() {
         <p className="text-slate-300 font-medium">Drag and drop job cards to systematically track your interview pipeline.</p>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-6 h-full min-h-[650px] custom-scrollbar">
+      <div className="grid h-full min-h-[650px] grid-cols-1 gap-4 pb-6 sm:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map(col => {
           const columnApps = apps.filter(a => a.status === col);
           
@@ -86,7 +86,7 @@ export default function Applications() {
           return (
             <div 
               key={col} 
-              className={`glass-panel rounded-3xl p-4 w-80 shrink-0 flex flex-col border ${colTheme} transition-colors`}
+              className={`glass-panel flex min-w-0 flex-col rounded-3xl border p-4 ${colTheme} transition-colors`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col)}
             >
@@ -101,7 +101,7 @@ export default function Applications() {
                     key={app._id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, app._id)}
-                    className="bg-white/[0.97] border border-white/20 p-4 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-cyan-300/50 hover:shadow-[0_0_24px_rgba(86,240,255,0.12)] transition-all group relative"
+                    className="group relative cursor-grab rounded-xl border border-white/20 bg-white/[0.97] p-4 shadow-sm transition-all hover:border-cyan-300/50 hover:shadow-[0_0_24px_rgba(86,240,255,0.12)] active:cursor-grabbing"
                   >
                     <button 
                       onClick={() => handleDelete(app._id)} 
@@ -111,11 +111,11 @@ export default function Applications() {
                     </button>
                     <div className="flex items-start gap-2">
                       <GripVertical className="w-4 h-4 text-slate-300 mt-1 shrink-0 px-0 -ml-1" />
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <h4 className="font-bold text-slate-900 text-sm leading-tight mb-1.5 pr-6">{app.jobTitle}</h4>
                         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                           <Building className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate max-w-[150px]">{app.company}</span>
+                          <span className="truncate">{app.company}</span>
                         </div>
                       </div>
                     </div>
