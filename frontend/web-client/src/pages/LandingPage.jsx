@@ -203,12 +203,18 @@ function MorphingHologram() {
 
 function HologramCanvas() {
   return (
-    <div className={`relative h-[26rem] overflow-hidden rounded-[2rem] shadow-[0_40px_120px_rgba(6,182,212,0.16)] ${glassSurface}`}>
+    <div className="relative h-[26rem] overflow-hidden rounded-[2rem] border border-white/10 bg-[#020617] shadow-[0_40px_120px_rgba(6,182,212,0.16)] backdrop-blur-[20px]">
       <div className="absolute left-5 top-5 z-10 rounded-full border border-cyan-300/20 bg-slate-950/40 px-3 py-1 text-xs font-black uppercase tracking-[0.24em] text-cyan-100 backdrop-blur-[20px]">
         Morphing Career Graph
       </div>
-      <Suspense fallback={<div className="flex h-full items-center justify-center text-cyan-200">Loading hologram...</div>}>
-        <Canvas camera={{ position: [0, 0, 5.6], fov: 48 }} dpr={[1, 1.5]}>
+      <div className="absolute inset-0 h-full w-full">
+        <Suspense fallback={<div className="flex h-full w-full items-center justify-center bg-[#020617] text-cyan-200">Loading hologram...</div>}>
+        <Canvas
+          className="!absolute !inset-0 !h-full !w-full"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+          camera={{ position: [0, 0, 5.6], fov: 48 }}
+          dpr={[1, 1.5]}
+        >
           <color attach="background" args={['#020617']} />
           <Stars radius={40} depth={14} count={600} factor={2.2} saturation={0} fade speed={0.45} />
           <ambientLight intensity={0.6} />
@@ -216,7 +222,8 @@ function HologramCanvas() {
           <MorphingHologram />
           <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.45} />
         </Canvas>
-      </Suspense>
+        </Suspense>
+      </div>
     </div>
   );
 }
