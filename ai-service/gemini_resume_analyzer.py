@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import time
 from dotenv import load_dotenv
 import requests
 
@@ -12,6 +13,7 @@ GEMINI_API_URL = os.getenv(
     "GEMINI_API_URL",
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
 )
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
 def _normalize_analysis(payload):
@@ -92,26 +94,37 @@ def analyze_resume_with_gemini(text):
         },
     }
 
-    try:
-        with requests.Session() as session:
-            # Bypass broken system/local proxy settings; Gemini is reachable directly.
-            session.trust_env = False
-            response = session.post(
-                GEMINI_API_URL,
-                headers={
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": api_key,
-                },
-                json=payload,
-                timeout=40,
-            )
-        response.raise_for_status()
-        raw_body = response.text
-    except requests.HTTPError as exc:
-        error_body = exc.response.text if exc.response is not None else str(exc)
-        raise RuntimeError(f"Gemini request failed: {error_body}") from exc
-    except requests.RequestException as exc:
-        raise RuntimeError(f"Gemini request failed: {exc}") from exc
+    last_error = None
+    with requests.Session() as session:
+        # Bypass broken system/local proxy settings; Gemini is reachable directly.
+        session.trust_env = False
+
+        for attempt in range(1, 4):
+            try:
+                response = session.post(
+                    GEMINI_API_URL,
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-goog-api-key": api_key,
+                    },
+                    json=payload,
+                    timeout=40,
+                )
+                response.raise_for_status()
+                raw_body = response.text
+                break
+            except requests.HTTPError as exc:
+                status_code = exc.response.status_code if exc.response is not None else None
+                error_body = exc.response.text if exc.response is not None else str(exc)
+                last_error = RuntimeError(f"Gemini request failed: {error_body}")
+                if status_code not in RETRYABLE_STATUS_CODES or attempt == 3:
+                    raise last_error from exc
+            except requests.RequestException as exc:
+                last_error = RuntimeError(f"Gemini request failed: {exc}")
+                if attempt == 3:
+                    raise last_error from exc
+
+            time.sleep(1.5 * attempt)
 
     data = json.loads(raw_body)
     candidate_text = (

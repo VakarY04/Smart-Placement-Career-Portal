@@ -12,7 +12,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden min-h-screen w-64 flex-col border-r border-white/8 bg-black/40 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-white/8 bg-black/40 md:flex">
       <div className="flex h-16 items-center border-b border-white/8 px-6">
         <div className="flex items-center gap-2 text-cyan-300 font-bold text-xl tracking-tight">
           <LayoutDashboard className="w-6 h-6" />
@@ -20,7 +20,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 py-6 px-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
         {menuItems.map((item) => (
           <NavLink
             key={item.name}
@@ -40,7 +40,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-white/8 p-4">
+      <div className="mt-auto border-t border-white/8 p-4">
         <MagneticButton
           onClick={() => {
             localStorage.removeItem('token');
