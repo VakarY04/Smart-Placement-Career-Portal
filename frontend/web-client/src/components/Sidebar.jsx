@@ -14,7 +14,7 @@ export default function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-white/8 bg-black/40 md:flex">
       <div className="flex h-16 items-center border-b border-white/8 px-6">
-        <div className="flex items-center gap-2 text-cyan-300 font-bold text-xl tracking-tight">
+        <div className="flex items-center gap-2 text-cyan-300 font-bold text-xl tracking-tight light-brand-text">
           <LayoutDashboard className="w-6 h-6" />
           SmartPortal
         </div>
@@ -29,7 +29,7 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
                 isActive
-                  ? 'bg-cyan-400/12 text-cyan-200 border border-cyan-300/20'
+                  ? 'bg-cyan-400/12 text-cyan-200 border border-cyan-300/20 light-nav-active'
                   : 'text-slate-400 hover:bg-white/6 hover:text-white'
               }`
             }

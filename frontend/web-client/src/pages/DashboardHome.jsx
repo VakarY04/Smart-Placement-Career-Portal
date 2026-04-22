@@ -140,7 +140,7 @@ function PipelinePreview({ applications }) {
                 const active = index <= stageIndex;
                 return (
                   <div key={`${application.jobTitle}-${stage}`} className="text-center">
-                    <div className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold ${active ? 'border-cyan-300/50 bg-cyan-400/20 text-cyan-100 shadow-[0_0_16px_rgba(86,240,255,0.25)]' : 'border-white/10 bg-white/[0.03] text-slate-500'}`}>
+                    <div className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold ${active ? 'pipeline-node-active border-cyan-300/50 bg-cyan-400/20 text-cyan-100 shadow-[0_0_16px_rgba(86,240,255,0.25)]' : 'pipeline-node-idle border-white/10 bg-white/[0.03] text-slate-500'}`}>
                       {index + 1}
                     </div>
                     <div className="relative h-1 rounded-full bg-white/6">
@@ -377,7 +377,7 @@ export default function DashboardHome() {
                 <p className="light-heading text-sm font-semibold text-white">Overall profile completeness</p>
                 <p className="light-body text-xs text-slate-400">Profile data density across academics, skills, and experience.</p>
               </div>
-              <span className="light-pill text-3xl font-black text-cyan-100">{derived.profileCompletenessScore}%</span>
+              <span className="profile-score-value text-3xl font-black text-cyan-100">{derived.profileCompletenessScore}%</span>
             </div>
           </div>
         </section>

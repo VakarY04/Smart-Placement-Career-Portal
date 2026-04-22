@@ -146,6 +146,41 @@
   box-shadow: none !important;
 }
 
+.theme-light .portal-theme-scope .light-brand-text {
+  color: #0891b2 !important;
+}
+
+.theme-light .portal-theme-scope .light-nav-active {
+  border-color: rgba(8, 145, 178, 0.26) !important;
+  background: rgba(207, 250, 254, 0.72) !important;
+  color: #155e75 !important;
+  box-shadow: none !important;
+}
+
+.theme-light .portal-theme-scope .light-nav-active svg {
+  color: #0891b2 !important;
+}
+
+.theme-light .portal-theme-scope .pipeline-node-active {
+  border-color: rgba(8, 145, 178, 0.3) !important;
+  background: rgba(207, 250, 254, 0.72) !important;
+  color: #155e75 !important;
+  box-shadow: none !important;
+}
+
+.theme-light .portal-theme-scope .pipeline-node-idle {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #334155 !important;
+}
+
+.theme-light .portal-theme-scope .profile-score-value {
+  color: #155e75 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 .theme-light .portal-theme-scope .light-pill-neutral {
   border-color: rgba(15, 23, 42, 0.1) !important;
   background: rgba(255, 255, 255, 0.88) !important;
