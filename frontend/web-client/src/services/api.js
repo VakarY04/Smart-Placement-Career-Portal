@@ -120,6 +120,15 @@ export const apiService = {
     }
   },
 
+  getLatestJobs: async () => {
+    try {
+      const response = await apiClient.get('/jobs/latest');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   getRoadmap: async (jobId) => {
     try {
       const response = await apiClient.get(`/roadmap/${jobId}`);
