@@ -59,10 +59,11 @@ async def parse_resume(file: UploadFile = File(...)):
     text = extract_text(file_path)
     try:
         gemini_analysis = analyze_resume_with_gemini(text)
-        gemini_analysis["provider"] = "ai"
+        gemini_analysis["provider"] = "gemini"
         return gemini_analysis
     except Exception as exc:
         fallback_analysis = analyze_resume_locally(text)
+        fallback_analysis["provider"] = "fallback"
         fallback_analysis["warning"] = str(exc)
         return fallback_analysis
 

@@ -36,8 +36,7 @@ const createResetTransport = () => nodemailer.createTransport({
 
 exports.register = async (req, res) => {
   try {
-    // Also extract role from req.body
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -46,14 +45,11 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Default unknown role input to STUDENT while preserving explicit ADMIN registration.
-    const finalRole = normalizeRole(role) === "ADMIN" ? "ADMIN" : "STUDENT";
-
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: finalRole
+      role: "STUDENT"
     });
 
     const token = signAuthToken(user);

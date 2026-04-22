@@ -48,6 +48,14 @@ const profileSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    provider: {
+      type: String,
+      default: "unknown",
+    },
+    warning: {
+      type: String,
+      default: "",
+    },
     improvement_suggestions: [
       {
         area: String,

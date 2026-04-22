@@ -315,13 +315,13 @@ export default function Profile() {
                   <UserCircle2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">Personal Snapshot</h2>
-                  <p className="text-sm text-slate-300">Add a crisp summary recruiters and matching logic can quickly understand.</p>
+                  <h2 className="light-heading text-xl font-black text-white">Personal Snapshot</h2>
+                  <p className="light-body text-sm text-slate-300">Add a crisp summary recruiters and matching logic can quickly understand.</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-200">Bio</label>
+                <label className="light-body text-sm font-semibold text-slate-200">Bio</label>
                 <textarea
                   name="bio"
                   value={formData.bio}
@@ -333,7 +333,7 @@ export default function Profile() {
               </div>
 
               <div className="mt-5 space-y-2">
-                <label className="text-sm font-semibold text-slate-200">Interests</label>
+                <label className="light-body text-sm font-semibold text-slate-200">Interests</label>
                 <textarea
                   name="interests"
                   value={formData.interests}
@@ -351,8 +351,8 @@ export default function Profile() {
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">Academic Card</h2>
-                  <p className="text-sm text-slate-300">Keep your academic credentials easy to scan.</p>
+                  <h2 className="light-heading text-xl font-black text-white">Academic Card</h2>
+                  <p className="light-body text-sm text-slate-300">Keep your academic credentials easy to scan.</p>
                 </div>
               </div>
 
@@ -395,15 +395,15 @@ export default function Profile() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">Interactive Skill Tags</h2>
-                  <p className="text-sm text-slate-300">Type a skill and press Enter to add it to your stack.</p>
+                  <h2 className="light-heading text-xl font-black text-white">Interactive Skill Tags</h2>
+                  <p className="light-body text-sm text-slate-300">Type a skill and press Enter to add it to your stack.</p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="light-surface-subtle rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-wrap gap-2">
                   {formData.skills.map(skill => (
-                    <span key={skill} className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-sm font-semibold text-white">
+                    <span key={skill} className="light-chip-dark inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-sm font-semibold text-white">
                       {skill}
                       <button type="button" onClick={() => removeSkill(skill)} className="rounded-full text-slate-300 transition hover:text-white">
                         <X className="h-4 w-4" />
@@ -423,7 +423,7 @@ export default function Profile() {
               </div>
 
               <div className="mt-5 space-y-2">
-                <label className="text-sm font-semibold text-slate-200">Certifications</label>
+                <label className="light-body text-sm font-semibold text-slate-200">Certifications</label>
                 <textarea
                   name="certifications"
                   value={formData.certifications}
@@ -442,15 +442,15 @@ export default function Profile() {
                     <Briefcase className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-white">Structured Experience List</h2>
-                    <p className="text-sm text-slate-300">Add internships, projects, and role-based experience as clean cards.</p>
+                  <h2 className="light-heading text-xl font-black text-white">Structured Experience List</h2>
+                  <p className="light-body text-sm text-slate-300">Add internships, projects, and role-based experience as clean cards.</p>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={addExperience}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  className="light-cta-secondary inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                 >
                   <Plus className="h-4 w-4" /> Add Experience
                 </button>
@@ -458,7 +458,7 @@ export default function Profile() {
 
               <div className="space-y-4">
                 {formData.experiences.map((experience, index) => (
-                  <div key={`experience-${index}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                  <div key={`experience-${index}`} className="light-surface-subtle rounded-3xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-4 flex items-center justify-between">
                       <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
                         <Building2 className="h-4 w-4" /> Experience {index + 1}
@@ -514,11 +514,11 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-slate-200 pt-2">
+        <div className="light-divider flex justify-end border-t border-slate-200 pt-2">
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-70"
+            className="light-cta inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-70"
           >
             {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
             {isExistingProfile ? 'Update Profile' : 'Save Profile'}

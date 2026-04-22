@@ -82,7 +82,7 @@ export default function SkillsDisplay({ analysis }) {
 
   return (
     <div className="space-y-6">
-      {analysis.warning && (
+      {(analysis.warning || analysis.provider === 'fallback') && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           Advanced AI analysis is temporarily limited, so this result uses the built-in analyzer for now.
         </div>

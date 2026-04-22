@@ -134,7 +134,7 @@ def analyze_resume_locally(text):
     suggestions = _build_suggestions(text, ats.get("feedback", []), categorized_skills)
 
     return {
-        "provider": "ai",
+        "provider": "fallback",
         "skills": flat_skills,
         "skills_by_category": categorized_skills or {"General": flat_skills},
         "ats_score": int(ats.get("score", 0) or 0),

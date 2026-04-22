@@ -78,7 +78,7 @@ function App() {
 
   return (
     <Router>
-      <div className="cyber-shell min-h-screen text-slate-100 font-sans">
+      <div className="min-h-screen text-slate-100 font-sans">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={

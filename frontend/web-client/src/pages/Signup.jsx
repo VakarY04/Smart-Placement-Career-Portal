@@ -1,28 +1,8 @@
 import { createElement, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
-import { User, Mail, Lock, AlertCircle, GraduationCap, Building2 } from 'lucide-react';
+import { User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { apiService } from '../services/api';
-
-function RoleTile({ active, icon: Icon, label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`relative rounded-2xl border px-4 py-4 text-sm font-semibold transition ${
-        active
-          ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100 shadow-[0_0_26px_rgba(34,211,238,0.18)]'
-          : 'border-white/10 bg-white/[0.03] text-slate-300 hover:border-cyan-300/20 hover:text-white'
-      }`}
-    >
-      <span className="flex flex-col items-center justify-center gap-2">
-        {createElement(Icon, { className: 'h-6 w-6' })}
-        {label}
-      </span>
-      {active && <span className="pointer-events-none absolute inset-0 rounded-2xl border border-cyan-300/50" />}
-    </button>
-  );
-}
 
 function AuthInput({ label, icon: Icon, type, value, onChange, placeholder, scanKey }) {
   return (
@@ -58,7 +38,6 @@ export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('STUDENT');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [scanKey, setScanKey] = useState({ name: 0, email: 0, password: 0 });
@@ -69,15 +48,10 @@ export default function Signup() {
     setError('');
 
     try {
-      const data = await apiService.register(name, email, password, role);
+      const data = await apiService.register(name, email, password, 'STUDENT');
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user || { name, role }));
-
-      if (data.user.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard/resume-upload');
-      }
+      localStorage.setItem('user', JSON.stringify(data.user || { name, role: 'STUDENT' }));
+      navigate('/dashboard/resume-upload');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -99,11 +73,6 @@ export default function Signup() {
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.35em] text-cyan-200">Cyber-Entry Portal</p>
             <h1 className="text-3xl font-black text-white">Create Access</h1>
             <p className="mt-2 text-sm text-slate-400">Generate a secure identity for the placement ecosystem.</p>
-          </div>
-
-          <div className="mb-6 grid grid-cols-2 gap-3">
-            <RoleTile active={role === 'STUDENT'} icon={GraduationCap} label="Student" onClick={() => setRole('STUDENT')} />
-            <RoleTile active={role === 'ADMIN'} icon={Building2} label="Admin" onClick={() => setRole('ADMIN')} />
           </div>
 
           {error && (
@@ -164,7 +133,7 @@ export default function Signup() {
                     <DecryptLoader /> Decrypting...
                   </>
                 ) : (
-                  `Create ${role === 'ADMIN' ? 'Admin Access' : 'Account'}`
+                  'Create Account'
                 )}
               </span>
             </button>
@@ -172,7 +141,7 @@ export default function Signup() {
 
           <p className="mt-6 text-center text-sm text-slate-400">
             Already have access?{' '}
-            <Link to={role === 'ADMIN' ? '/login?role=admin' : '/login'} className="font-semibold text-cyan-200 hover:text-white">
+            <Link to="/login" className="font-semibold text-cyan-200 hover:text-white">
               Log in
             </Link>
           </p>

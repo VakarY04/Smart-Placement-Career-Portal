@@ -91,7 +91,7 @@ function CircularMetric({ label, value, color }) {
   const offset = circumference - (safeValue / 100) * circumference;
 
   return (
-    <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 text-center">
+    <div className="light-surface rounded-3xl border border-white/8 bg-white/[0.03] p-4 text-center">
       <div className="mx-auto mb-3 h-28 w-28">
         <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
           <circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} fill="none" />
@@ -109,17 +109,17 @@ function CircularMetric({ label, value, color }) {
           />
         </svg>
         <div className="pointer-events-none -mt-[75px] text-center">
-          <div className="text-2xl font-black text-white">{safeValue}%</div>
+          <div className="light-heading text-2xl font-black text-white">{safeValue}%</div>
         </div>
       </div>
-      <p className="text-sm font-semibold text-slate-300">{label}</p>
+      <p className="light-body text-sm font-semibold text-slate-300">{label}</p>
     </div>
   );
 }
 
 function PipelinePreview({ applications }) {
   if (!applications.length) {
-    return <div className="rounded-3xl border border-dashed border-white/12 bg-white/[0.02] p-6 text-sm text-slate-400">Start tracking jobs to unlock your live node pipeline.</div>;
+    return <div className="light-surface rounded-3xl border border-dashed border-white/12 bg-white/[0.02] p-6 text-sm text-slate-400">Start tracking jobs to unlock your live node pipeline.</div>;
   }
 
   return (
@@ -127,13 +127,13 @@ function PipelinePreview({ applications }) {
       {applications.map((application) => {
         const stageIndex = applicationStatusStageMap[application.status] ?? 0;
         return (
-          <div key={application._id || `${application.jobTitle}-${application.company}`} className="rounded-3xl border border-white/8 bg-white/[0.03] p-4">
+          <div key={application._id || `${application.jobTitle}-${application.company}`} className="light-surface rounded-3xl border border-white/8 bg-white/[0.03] p-4">
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
-                <h4 className="text-base font-bold text-white">{application.jobTitle}</h4>
-                <p className="text-sm text-slate-400">{application.company}</p>
+                <h4 className="light-heading text-base font-bold text-white">{application.jobTitle}</h4>
+                <p className="light-body text-sm text-slate-400">{application.company}</p>
               </div>
-              <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">{application.status}</span>
+              <span className="light-pill rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">{application.status}</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {pipelineStages.map((stage, index) => {
@@ -146,7 +146,7 @@ function PipelinePreview({ applications }) {
                     <div className="relative h-1 rounded-full bg-white/6">
                       {active && <div className="cyber-flow-line absolute inset-0 rounded-full bg-cyan-300/50" />}
                     </div>
-                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stage}</p>
+                    <p className="light-muted mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stage}</p>
                   </div>
                 );
               })}
@@ -278,12 +278,12 @@ export default function DashboardHome() {
           </div>
           <div className="grid grid-cols-2 gap-3 xl:w-[420px]">
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Match Index</p>
-              <p className="mt-2 text-4xl font-black text-white">{derived.marketMatchIndex}%</p>
+              <p className="light-muted text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Match Index</p>
+              <p className="light-heading mt-2 text-4xl font-black text-white">{derived.marketMatchIndex}%</p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Active Roles</p>
-              <p className="mt-2 text-4xl font-black text-white">{derived.recommendationCount}</p>
+              <p className="light-muted text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Active Roles</p>
+              <p className="light-heading mt-2 text-4xl font-black text-white">{derived.recommendationCount}</p>
             </div>
           </div>
         </div>
@@ -294,18 +294,18 @@ export default function DashboardHome() {
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Market Readiness Widget</p>
-              <h2 className="mt-2 text-2xl font-black text-white">Market Match Index</h2>
-              <p className="mt-2 text-sm text-slate-400">A glowing readiness line rendered from your strongest role alignment over time.</p>
+              <h2 className="light-heading mt-2 text-2xl font-black text-white">Market Match Index</h2>
+              <p className="light-body mt-2 text-sm text-slate-400">A glowing readiness line rendered from your strongest role alignment over time.</p>
             </div>
-            <div className="rounded-3xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-right text-cyan-200 shadow-[0_0_24px_rgba(86,240,255,0.14)]">
+            <div className="light-pill rounded-3xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-right text-cyan-200 shadow-[0_0_24px_rgba(86,240,255,0.14)]">
               <p className="text-xs font-bold uppercase tracking-[0.2em]">Current</p>
               <p className="mt-2 text-3xl font-black">{derived.marketMatchIndex}%</p>
             </div>
           </div>
-          <div className="rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-4">
-            <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="light-surface rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-4">
+            <div className="light-muted mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               <span>Signal Trend</span>
-              <span className="text-cyan-200">Auto-drawing path</span>
+              <span className="light-pill rounded-full px-3 py-1 text-cyan-200">Auto-drawing path</span>
             </div>
             <AnimatedMatchPath points={derived.sparklinePoints} />
             <div className="mt-3 flex justify-between text-xs font-semibold text-slate-500">
@@ -319,20 +319,20 @@ export default function DashboardHome() {
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Top Gaps & Roadmap</p>
-              <h2 className="mt-2 text-2xl font-black text-white">Highest Demand Skills Missing</h2>
-              <p className="mt-2 text-sm text-slate-400">The strongest role gaps surfaced through your current recommendation graph.</p>
+              <h2 className="light-heading mt-2 text-2xl font-black text-white">Highest Demand Skills Missing</h2>
+              <p className="light-body mt-2 text-sm text-slate-400">The strongest role gaps surfaced through your current recommendation graph.</p>
             </div>
             <div className="rounded-3xl border border-cyan-300/20 bg-white/[0.04] p-3 text-cyan-200"><Layers3 className="h-6 w-6" /></div>
           </div>
           <div className="space-y-4">
             {derived.topGaps.length ? derived.topGaps.map((gap, index) => (
-              <div key={gap.key} className="rounded-3xl border border-white/8 bg-white/[0.03] p-4">
+              <div key={gap.key} className="light-surface rounded-3xl border border-white/8 bg-white/[0.03] p-4">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-sm font-black text-cyan-100">0{index + 1}</div>
+                    <div className="light-pill flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-sm font-black text-cyan-100">0{index + 1}</div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{gap.skill}</h3>
-                      <p className="mt-1 text-sm text-slate-400">Missing in {gap.count} high-fit role{gap.count > 1 ? 's' : ''}{gap.job?.title ? ` including ${gap.job.title}` : ''}.</p>
+                      <h3 className="light-heading text-lg font-bold text-white">{gap.skill}</h3>
+                      <p className="light-body mt-1 text-sm text-slate-400">Missing in {gap.count} high-fit role{gap.count > 1 ? 's' : ''}{gap.job?.title ? ` including ${gap.job.title}` : ''}.</p>
                     </div>
                   </div>
                   <MagneticButton
@@ -345,14 +345,14 @@ export default function DashboardHome() {
                       }
                       navigate(`/dashboard/roadmap/${target.jobId}`, { state: { missingSkills: target.missingSkills, focusSkill: gap.skill } });
                     }}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-semibold text-cyan-100"
+                    className="light-cta inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-semibold text-cyan-100"
                   >
                     Start Learning <ArrowRight className="h-4 w-4" />
                   </MagneticButton>
                 </div>
               </div>
             )) : (
-              <div className="rounded-3xl border border-dashed border-emerald-300/20 bg-emerald-400/6 p-6 text-sm text-emerald-200">
+              <div className="light-surface rounded-3xl border border-dashed border-emerald-300/20 bg-emerald-400/6 p-6 text-sm text-emerald-200">
                 Your profile is covering the visible hard-skill requirements well. Explore recommendations to deepen role-specific prep.
               </div>
             )}
@@ -363,21 +363,21 @@ export default function DashboardHome() {
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">ATS Scoring Insight</p>
-              <h2 className="mt-2 text-2xl font-black text-white">Profile Health Breakdown</h2>
-              <p className="mt-2 text-sm text-slate-400">Signal distribution across keywords, experience, and formatting precision.</p>
+              <h2 className="light-heading mt-2 text-2xl font-black text-white">Profile Health Breakdown</h2>
+              <p className="light-body mt-2 text-sm text-slate-400">Signal distribution across keywords, experience, and formatting precision.</p>
             </div>
             <div className="rounded-3xl border border-white/8 bg-white/[0.04] p-3 text-cyan-200"><FileSearch className="h-6 w-6" /></div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {derived.atsMetrics.map((metric) => <CircularMetric key={metric.label} {...metric} />)}
           </div>
-          <div className="mt-5 rounded-3xl border border-white/8 bg-white/[0.03] p-4">
+          <div className="light-surface mt-5 rounded-3xl border border-white/8 bg-white/[0.03] p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-white">Overall profile completeness</p>
-                <p className="text-xs text-slate-400">Profile data density across academics, skills, and experience.</p>
+                <p className="light-heading text-sm font-semibold text-white">Overall profile completeness</p>
+                <p className="light-body text-xs text-slate-400">Profile data density across academics, skills, and experience.</p>
               </div>
-              <span className="text-3xl font-black text-cyan-100">{derived.profileCompletenessScore}%</span>
+              <span className="light-pill text-3xl font-black text-cyan-100">{derived.profileCompletenessScore}%</span>
             </div>
           </div>
         </section>
@@ -386,8 +386,8 @@ export default function DashboardHome() {
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Active Pipeline Preview</p>
-              <h2 className="mt-2 text-2xl font-black text-white">Top Applications In Motion</h2>
-              <p className="mt-2 text-sm text-slate-400">A compact node pipeline for your three most advanced opportunities.</p>
+              <h2 className="light-heading mt-2 text-2xl font-black text-white">Top Applications In Motion</h2>
+              <p className="light-body mt-2 text-sm text-slate-400">A compact node pipeline for your three most advanced opportunities.</p>
             </div>
             <div className="rounded-3xl border border-white/8 bg-white/[0.04] p-3 text-cyan-200"><Compass className="h-6 w-6" /></div>
           </div>
@@ -398,22 +398,22 @@ export default function DashboardHome() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <MagneticButton as={Link} to="/dashboard/recommendations" className="glass-panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-white">Explore Matches</p>
-            <p className="text-sm text-slate-400">Review recommended roles and fit scores.</p>
+            <p className="light-heading text-sm font-bold text-white">Explore Matches</p>
+            <p className="light-body text-sm text-slate-400">Review recommended roles and fit scores.</p>
           </div>
           <Target className="h-5 w-5 text-cyan-200" />
         </MagneticButton>
         <MagneticButton as={Link} to="/dashboard/applications" className="glass-panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-white">Open Tracker</p>
-            <p className="text-sm text-slate-400">Manage your full application board.</p>
+            <p className="light-heading text-sm font-bold text-white">Open Tracker</p>
+            <p className="light-body text-sm text-slate-400">Manage your full application board.</p>
           </div>
           <Briefcase className="h-5 w-5 text-cyan-200" />
         </MagneticButton>
         <MagneticButton as={Link} to="/dashboard/profile" className="glass-panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-white">Refine Profile</p>
-            <p className="text-sm text-slate-400">Improve ATS and market readiness signals.</p>
+            <p className="light-heading text-sm font-bold text-white">Refine Profile</p>
+            <p className="light-body text-sm text-slate-400">Improve ATS and market readiness signals.</p>
           </div>
           <Sparkles className="h-5 w-5 text-cyan-200" />
         </MagneticButton>

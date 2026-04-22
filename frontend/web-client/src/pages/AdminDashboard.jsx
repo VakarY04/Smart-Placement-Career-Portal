@@ -202,7 +202,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_32%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)]">
+    <div className="portal-theme-scope min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_32%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)]">
       <div className="mx-auto flex min-h-screen max-w-7xl gap-6 px-4 py-6 md:px-6">
         <aside className="hidden w-72 shrink-0 flex-col rounded-[28px] bg-slate-950 p-6 text-slate-300 shadow-2xl shadow-slate-900/20 md:flex">
           <div>

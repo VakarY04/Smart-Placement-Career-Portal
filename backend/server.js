@@ -111,7 +111,7 @@ app.get("/api/resume/latest", protect, async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user.id }, "resumeAnalysis");
     if (!profile?.resumeAnalysis) {
-      return res.status(404).json({ message: "No resume analysis found" });
+      return res.json(null);
     }
 
     res.json(profile.resumeAnalysis);
